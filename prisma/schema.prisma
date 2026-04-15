@@ -16,7 +16,8 @@ model Cliente {
   razonSocial       String       @map("razon_social")
   tipoDocumento     TipoDoc      @map("tipo_documento")
   numeroDocumento   String       @unique @map("numero_documento")
-  numeroTelefono    String?      @map("numero_telefono")
+  tipoCliente       TipoCliente  @map("tipo_cliente")        
+  numeroTelefono    String       @map("numero_telefono")
   correoElectronico String?      @unique @map("correo_electronico")
   
   activo            Boolean      @default(true)
@@ -30,4 +31,9 @@ model Cliente {
 enum TipoDoc {
   DNI
   RUC
+}
+
+enum TipoCliente {
+  MINORISTA
+  MAYORISTA
 }
