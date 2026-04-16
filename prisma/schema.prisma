@@ -10,7 +10,7 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
+//falta agregar dirección
 model Cliente {
   id                String       @id @default(uuid())
   razonSocial       String       @map("razon_social")
@@ -19,7 +19,7 @@ model Cliente {
   tipoCliente       TipoCliente  @map("tipo_cliente")        
   numeroTelefono    String       @map("numero_telefono")
   correoElectronico String?      @unique @map("correo_electronico")
-  
+  direccion         String      
   activo            Boolean      @default(true)
   
   createdAt         DateTime     @default(now()) @map("created_at")
