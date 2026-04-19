@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Cliente {
-  id                String       @id @default(uuid())
+  id                String       @id
   razonSocial       String       @map("razon_social")
   tipoDocumento     TipoDoc      @map("tipo_documento")
   numeroDocumento   String       @unique @map("numero_documento")
@@ -20,10 +20,13 @@ model Cliente {
   numeroTelefono    String       @map("numero_telefono")
   correoElectronico String?      @unique @map("correo_electronico")
   direccion         String      
+
   activo            Boolean      @default(true)
+  version           Int          @default(1)
   
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")
+  deleteAt          DateTime     @map("delete_at")
 
   @@map("clientes")
 }
