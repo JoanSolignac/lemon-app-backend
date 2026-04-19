@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Cliente {
-  id                String       @id @default(uuid())
+  id                String       @id
   razonSocial       String       @map("razon_social")
   tipoDocumento     TipoDoc      @map("tipo_documento")
   numeroDocumento   String       @unique @map("numero_documento")
