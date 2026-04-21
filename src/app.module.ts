@@ -4,6 +4,7 @@ import { validationSchema } from './config/validation.schema';
 import { appConfig } from './config/app.config';
 import { databaseConfig } from './config/database.config';
 import { PrismaModule } from './database/prisma/prisma.module';
+import { ClientesModule } from './clientes/clientes.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { PrismaModule } from './database/prisma/prisma.module';
       load: [appConfig, databaseConfig],
       isGlobal: true,
     }),
-    PrismaModule
+    PrismaModule,
+    ClientesModule
   ],
 })
 export class AppModule {}
