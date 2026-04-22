@@ -3,8 +3,6 @@ import { ClienteUpdateParams } from '../types/cliente-update-params.type';
 import { Cliente } from '../types/cliente.type'
 import { SoftDeleteParams } from '../types/soft-delete-params.type';
 
-export const ICLIENTE_REPOSITORY = Symbol('IClienteRepository')
-
 export interface IClientesRepository {
   create(data: Cliente): Promise<Cliente>
 
@@ -16,7 +14,7 @@ export interface IClientesRepository {
 
   findAllForPagination(params: PaginatedParams): Promise<{ data: Cliente[]; total: number }>
 
-  update(params: ClienteUpdateParams): Promise<boolean>
+  update(params: ClienteUpdateParams): Promise<void>
 
-  softDelete(params: SoftDeleteParams): Promise<boolean>
+  softDelete(params: SoftDeleteParams): Promise<void>
 }

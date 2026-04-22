@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientesService } from './clientes.service';
-import { ICLIENTE_REPOSITORY } from '../repositories/clientes.repository';
+import { ICLIENTE_REPOSITORY } from '../constants/cliente.constants';
 
 describe('ClientesService', () => {
   let service: ClientesService;

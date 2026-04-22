@@ -17,7 +17,7 @@ model Cliente {
   tipoDocumento     TipoDoc      @map("tipo_documento")
   numeroDocumento   String       @unique @map("numero_documento")
   tipoCliente       TipoCliente  @map("tipo_cliente")        
-  numeroTelefono    String       @map("numero_telefono")
+  numeroTelefono    String       @unique @map("numero_telefono")
   correoElectronico String?      @unique @map("correo_electronico")
   direccion         String      
 
