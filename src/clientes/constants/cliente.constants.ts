@@ -1,0 +1,1 @@
+export const ICLIENTE_REPOSITORY = Symbol('IClienteRepository')

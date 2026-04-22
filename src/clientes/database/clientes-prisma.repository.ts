@@ -1,17 +1,15 @@
-import { ConflictException, Injectable } from "@nestjs/common";
-import { Prisma } from "@prisma/client";
-import { PrismaService } from "../../database/prisma/prisma.service";
-
-import { IClientesRepository } from "../repositories/clientes.repository";
-import { Cliente } from "../types/cliente.type";
-import { ClienteUpdateParams } from "../types/cliente-update-params.type";
-import { PaginatedParams } from "src/common/types/paginated-params.type";
-import { SoftDeleteParams } from "../types/soft-delete-params.type";
-
+import { ConflictException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { PaginatedParams } from 'src/common/types/paginated-params.type';
+import { PrismaService } from '../../database/prisma/prisma.service';
+import { IClientesRepository } from '../repositories/clientes.repository';
+import { Cliente } from '../types/cliente.type';
+import { ClienteUpdateParams } from '../types/cliente-update-params.type';
+import { SoftDeleteParams } from '../types/soft-delete-params.type';
+import { CLIENTE_CORREO_ELECTRONICO_CONFLICT, CLIENTE_ID_CONFLICT, CLIENTE_NUMERO_DOCUMENTO_CONFLICT, CLIENTE_NUMERO_TELEFONO_CONFLICT } from '../errors/clientes.errors';
 @Injectable()
 export class ClientesPrismaRepository implements IClientesRepository {
-  constructor(private readonly prisma: PrismaService) {
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Cliente): Promise<Cliente> {
     try {
@@ -31,19 +29,7 @@ export class ClientesPrismaRepository implements IClientesRepository {
         },
       });
     } catch (error: unknown) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        const target = Array.isArray(error.meta?.target) ? error.meta.target : [];
-
-        if (target.includes('id')) {
-          return this.prisma.cliente.findUniqueOrThrow({
-          where: { id: data.id },
-          });
-        }
-
-        throw new ConflictException('El numero de documento o correo electronico ya existe.');
-      }
-
-      throw error;
+      this.handlePrismaError(error);
     }
   }
 
@@ -63,9 +49,13 @@ export class ClientesPrismaRepository implements IClientesRepository {
     return this.prisma.cliente.findMany({
       where: {
         updatedAt: {
-          gt: lastSync
-        }
-      }
+          gt: lastSync,
+        },
+      },
+      orderBy: [
+        { updatedAt: 'asc' },
+        { id: 'asc' },
+      ],
     });
   }
 
@@ -91,25 +81,45 @@ export class ClientesPrismaRepository implements IClientesRepository {
     return { data, total };
   }
 
-  async update(params: ClienteUpdateParams): Promise<boolean> {
-    const { id, data } =  params;
+  async update(params: ClienteUpdateParams): Promise<void> {
+    const { id, data } = params;
 
-    const result = await this.prisma.cliente.updateMany({
-      where: { id,version: data.version, deletedAt: null }, 
-      data: {
-        ...data,
-        version: { increment: 1 },
-      },
-    });
+    try {
+      const result = await this.prisma.cliente.updateMany({
+        where: {
+          id,
+          version: data.version,
+          deletedAt: null,
+        },
+        data: {
+          razonSocial: data.razonSocial,
+          tipoDocumento: data.tipoDocumento,
+          numeroDocumento: data.numeroDocumento,
+          tipoCliente: data.tipoCliente,
+          numeroTelefono: data.numeroTelefono,
+          correoElectronico: data.correoElectronico,
+          direccion: data.direccion,
+          version: { increment: 1 },
+        },
+      });
 
-    return result.count > 0;
+      if (result.count === 0) {
+        throw new ConflictException('Conflicto de version o cliente no encontrado.');
+      }
+    } catch (error: unknown) {
+      this.handlePrismaError(error);
+    }
   }
 
-  async softDelete(params: SoftDeleteParams): Promise<boolean> {
-    const { id, version } = params
+  async softDelete(params: SoftDeleteParams): Promise<void> {
+    const { id, version } = params;
 
     const result = await this.prisma.cliente.updateMany({
-      where: { id, version,  deletedAt: null },
+      where: {
+        id,
+        version,
+        deletedAt: null,
+      },
       data: {
         activo: false,
         deletedAt: new Date(),
@@ -117,6 +127,94 @@ export class ClientesPrismaRepository implements IClientesRepository {
       },
     });
 
-    return result.count > 0;
+    if (result.count === 0) {
+      throw new ConflictException('Conflicto de version o cliente no encontrado.');
+    }
+  }
+
+  private handlePrismaError(error: unknown): never {
+    if (error instanceof ConflictException) {
+      throw error;
+    }
+
+    /**
+     * @description Maneja errores de Prisma relacionados con violaciones de restricciones UNIQUE (P2002).
+     */
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+
+      let target = this.getUniqueConstraintTarget(error);
+
+      target = target.map(field =>
+        field.toLowerCase().replace(/_/g, '')
+      );
+
+      if (target.some(field => field.includes('id'))){
+        throw new ConflictException({
+          code: CLIENTE_ID_CONFLICT,
+          message: 'El cliente ya existe.',
+        })
+      }
+
+      if (target.some(field => field.includes('numerodocumento'))){
+        throw new ConflictException({
+          code: CLIENTE_NUMERO_DOCUMENTO_CONFLICT,
+          message: 'El numero de documento ya existe.',
+        })
+      }
+      
+       if (target.some(field => field.includes('numerotelefono'))){
+        throw new ConflictException({
+          code: CLIENTE_NUMERO_TELEFONO_CONFLICT,
+          message: 'El numero de telefono ya existe.',
+        })
+      }
+
+        if (target.some(field => field.includes('correoelectronico'))){
+        throw new ConflictException({
+          code: CLIENTE_CORREO_ELECTRONICO_CONFLICT,
+          message: 'El correo electronico ya existe.',
+        })
+      }
+    }
+
+    throw error;
+  }
+
+  private getUniqueConstraintTarget(error: Prisma.PrismaClientKnownRequestError): string[] {
+
+    /**
+     * @description Extrae los campos afectados por una restricción UNIQUE (P2002) de Prisma.
+     *
+     * Prisma puede devolver `meta.target` en diferentes formatos:
+     *
+     * Ejemplos:
+     * {
+     *   code: 'P2002',
+     *   meta: { target: ['numeroDocumento'] }
+     * }
+     *
+     * {
+     *   code: 'P2002',
+     *   meta: { target: 'numeroDocumento' }
+     * }
+     *
+     * {
+     *   code: 'P2002',
+     *   meta: { target: ['Cliente_numeroDocumento_key'] }
+     * }
+     *
+     * {
+     *   code: 'P2002',
+     *   meta: {}
+     * }
+     *
+     * Esta función normaliza siempre el resultado a `string[]`
+     * para poder procesarlo de forma segura en la lógica de negocio.
+     */
+    const target = error.meta?.target;
+
+    return Array.isArray(target) ? target.filter((value): value is string => typeof value === "string") 
+      : typeof target === "string" ? [target] 
+      : [];
   }
 }
