@@ -13,8 +13,8 @@ const MAX_LIMIT = 100;
 export const normalizePaginationDto = (params: { page: number; limit: number }) => {
     let { page, limit } = params;
 
-    page = Math.max(page, 1);
-    limit = Math.min(Math.max(limit, 1), MAX_LIMIT);
+    page = Number.isFinite(page) ? Math.max(page, 1) : 1;
+    limit = Number.isFinite(limit) ? Math.min(Math.max(limit, 1), MAX_LIMIT) : 1;
 
     return { page, limit };
 };
