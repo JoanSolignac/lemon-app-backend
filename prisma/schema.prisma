@@ -40,3 +40,24 @@ enum TipoCliente {
   MINORISTA
   MAYORISTA
 }
+
+model Usuario {
+  id                String      @id
+  rol               Rol      
+  nombre            String      
+  correoElectronico String      @unique
+  contrasena        String
+
+  activo            Boolean     @default(true)
+
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt  @map("updated_at")
+  deletedAt         DateTime?   @map("deleted_at")
+
+  @@map("usuario")    
+}
+
+enum Rol {
+  ADMINISTRADOR
+  SUPERVISOR
+}
