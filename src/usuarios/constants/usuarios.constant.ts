@@ -1,1 +1,1 @@
-export const ISUARIOS_REPOSITORY = Symbol('IUsuariosRepository');
+export const IUSUARIO_REPOSITORY = Symbol('IUsuariosRepository');

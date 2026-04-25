@@ -3,11 +3,13 @@ import { Prisma } from '@prisma/client';
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { USUARIO_CORREO_ELECTRONICO_CONFLICT, USUARIO_ID_CONFLICT } from '../errors/usuarios.errors';
-import { IUsuarioRepository, UsuarioUpdateParams } from '../repositories/usuarios.repository';
+import { IUsuariosRepository } from '../repositories/usuarios.repository';
+import { SoftDeleteParams } from '../types/soft-delete-params.type';
 import { Usuario } from '../types/usuario.type';
+import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 
 @Injectable()
-export class UsuariosPrismaRepository implements IUsuarioRepository {
+export class UsuariosPrismaRepository implements IUsuariosRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Usuario): Promise<Usuario> {
@@ -80,7 +82,7 @@ export class UsuariosPrismaRepository implements IUsuarioRepository {
     const { id, data } = params;
 
     try {
-      await this.prisma.usuario.updateMany({
+      const result = await this.prisma.usuario.updateMany({
         where: {
           id,
           deletedAt: null,
@@ -93,13 +95,19 @@ export class UsuariosPrismaRepository implements IUsuarioRepository {
           activo: data.activo,
         },
       });
+
+      if (result.count === 0) {
+        throw new ConflictException('Usuario no encontrado.');
+      }
     } catch (error: unknown) {
       this.handlePrismaError(error);
     }
   }
 
-  async softDelete(id: string): Promise<void> {
-    await this.prisma.usuario.updateMany({
+  async softDelete(params: SoftDeleteParams): Promise<void> {
+    const { id } = params;
+
+    const result = await this.prisma.usuario.updateMany({
       where: {
         id,
         deletedAt: null,
@@ -109,6 +117,10 @@ export class UsuariosPrismaRepository implements IUsuarioRepository {
         deletedAt: new Date(),
       },
     });
+
+    if (result.count === 0) {
+      throw new ConflictException('Usuario no encontrado.');
+    }
   }
 
   private handlePrismaError(error: unknown): never {

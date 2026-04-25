@@ -1,12 +1,9 @@
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
+import { SoftDeleteParams } from '../types/soft-delete-params.type';
+import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 import { Usuario } from '../types/usuario.type';
 
-export type UsuarioUpdateParams = {
-  id: string
-  data: Pick<Usuario, 'rol' | 'nombre' | 'correoElectronico' | 'contrasena' | 'activo'>
-}
-
-export interface IUsuarioRepository {
+export interface IUsuariosRepository {
   create(data: Usuario): Promise<Usuario>
 
   findById(id: string): Promise<Usuario | null>
@@ -19,5 +16,5 @@ export interface IUsuarioRepository {
 
   update(params: UsuarioUpdateParams): Promise<void>
 
-  softDelete(id: string): Promise<void>
+  softDelete(params: SoftDeleteParams): Promise<void>
 }

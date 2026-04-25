@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
-import { ISUARIOS_REPOSITORY } from './constants/usuarios.constant';
+import { IUSUARIO_REPOSITORY } from './constants/usuarios.constant';
 import { UsuariosPrismaRepository } from './database/usuarios-prisma.repository';
-import { ServicesService } from './services/services.service';
+import { UsuariosService } from './services/usuarios.service';
 
 @Module({
-    providers: [{
-        provide: ISUARIOS_REPOSITORY,
-        useClass: UsuariosPrismaRepository,
-    }, ServicesService]
+  providers: [
+    {
+      provide: IUSUARIO_REPOSITORY,
+      useClass: UsuariosPrismaRepository,
+    },
+    UsuariosService,
+  ],
 })
 export class UsuariosModule {}
