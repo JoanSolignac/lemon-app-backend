@@ -5,6 +5,7 @@ import { appConfig } from './config/app.config';
 import { databaseConfig } from './config/database.config';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { ClientesModule } from './clientes/clientes.module';
+import { UsuariosModule } from './usuarios/usuarios.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { ClientesModule } from './clientes/clientes.module';
       isGlobal: true,
     }),
     PrismaModule,
-    ClientesModule
+    ClientesModule,
+    UsuariosModule
   ],
 })
 export class AppModule {}
