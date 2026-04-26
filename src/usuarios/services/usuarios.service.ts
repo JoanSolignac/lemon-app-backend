@@ -4,7 +4,6 @@ import { PaginatedResult } from 'src/common/types/paginated-result.type';
 import { calculateSkipTakeForPagination, normalizePaginationDto } from 'src/common/utils/pagination.util';
 import { IUSUARIO_REPOSITORY } from '../constants/usuarios.constant';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
-import { DeleteUsuarioDto } from '../dtos/requests/delete-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import type { IUsuariosRepository } from '../repositories/usuarios.repository';
 import { Usuario } from '../types/usuario.type';
@@ -71,7 +70,7 @@ export class UsuariosService {
     });
   }
 
-  async delete(id: string, _dto?: DeleteUsuarioDto): Promise<void> {
-    await this.usuarioRepository.softDelete({ id });
+  async delete(id: string): Promise<void> {
+    await this.usuarioRepository.softDelete(id);
   }
 }

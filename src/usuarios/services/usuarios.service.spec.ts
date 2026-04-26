@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { IUSUARIO_REPOSITORY } from '../constants/usuarios.constant';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
-import { DeleteUsuarioDto } from '../dtos/requests/delete-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import { IUsuariosRepository } from '../repositories/usuarios.repository';
 import { UsuariosService } from './usuarios.service';
@@ -215,16 +214,12 @@ describe('UsuariosService', () => {
   });
 
   describe('delete', () => {
-    const deleteDto: DeleteUsuarioDto = {};
-
     it('debe eliminar un usuario', async () => {
       usuarioRepository.softDelete.mockResolvedValue();
 
-      const result = await usuariosService.delete(ID_USUARIO, deleteDto);
+      const result = await usuariosService.delete(ID_USUARIO);
 
-      expect(usuarioRepository.softDelete).toHaveBeenCalledWith({
-        id: ID_USUARIO,
-      });
+      expect(usuarioRepository.softDelete).toHaveBeenCalledWith(ID_USUARIO);
       expect(result).toBeUndefined();
     });
 
@@ -232,7 +227,7 @@ describe('UsuariosService', () => {
       const error = new Error('Error al eliminar usuario');
       usuarioRepository.softDelete.mockRejectedValue(error);
 
-      await expect(usuariosService.delete(ID_USUARIO, deleteDto)).rejects.toThrow('Error al eliminar usuario');
+      await expect(usuariosService.delete(ID_USUARIO)).rejects.toThrow('Error al eliminar usuario');
       expect(usuarioRepository.softDelete).toHaveBeenCalledTimes(1);
     });
   });
