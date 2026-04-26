@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } fr
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { PaginatedResult } from 'src/common/types/paginated-result.type';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
-import { DeleteUsuarioDto } from '../dtos/requests/delete-usuario.dto';
 import { SyncQueryDto } from '../dtos/requests/sync-query.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import { UsuariosService } from '../services/usuarios.service';
@@ -45,7 +44,7 @@ export class UsuariosController {
 
   @Delete(':id')
   @HttpCode(204)
-  async delete(@Param('id') id: string, @Body() dto: DeleteUsuarioDto): Promise<void> {
-    await this.usuariosService.delete(id, dto);
+  async delete(@Param('id') id: string): Promise<void> {
+    await this.usuariosService.delete(id);
   }
 }

@@ -4,7 +4,6 @@ import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { USUARIO_CORREO_ELECTRONICO_CONFLICT, USUARIO_ID_CONFLICT } from '../errors/usuarios.errors';
 import { IUsuariosRepository } from '../repositories/usuarios.repository';
-import { SoftDeleteParams } from '../types/soft-delete-params.type';
 import { Usuario } from '../types/usuario.type';
 import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 
@@ -104,9 +103,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     }
   }
 
-  async softDelete(params: SoftDeleteParams): Promise<void> {
-    const { id } = params;
-
+  async softDelete(id: string): Promise<void> {
     const result = await this.prisma.usuario.updateMany({
       where: {
         id,

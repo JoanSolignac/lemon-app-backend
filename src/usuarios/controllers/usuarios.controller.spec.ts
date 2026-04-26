@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
-import { DeleteUsuarioDto } from '../dtos/requests/delete-usuario.dto';
 import { SyncQueryDto } from '../dtos/requests/sync-query.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import { UsuariosService } from '../services/usuarios.service';
@@ -147,12 +146,11 @@ describe('UsuariosController', () => {
 
   describe('delete', () => {
     it('debe eliminar un usuario', async () => {
-      const dto: DeleteUsuarioDto = {};
       usuariosService.delete.mockResolvedValue();
 
-      const result = await controller.delete('usr-001', dto);
+      const result = await controller.delete('usr-001');
 
-      expect(usuariosService.delete).toHaveBeenCalledWith('usr-001', dto);
+      expect(usuariosService.delete).toHaveBeenCalledWith('usr-001');
       expect(result).toBeUndefined();
     });
   });
