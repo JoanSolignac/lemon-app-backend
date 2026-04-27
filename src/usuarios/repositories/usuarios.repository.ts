@@ -1,17 +1,20 @@
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
+import { UsuarioForAuth } from '../types/usuario-for-auth.type';
 import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 import { Usuario } from '../types/usuario.type';
 
 export interface IUsuariosRepository {
-  create(data: Usuario): Promise<Usuario>
+  create(data: Usuario): Promise<Partial<Usuario>>
 
-  findById(id: string): Promise<Usuario | null>
+  findById(id: string): Promise<Partial<Usuario> | null>
 
-  findByCorreoElectronico(correoElectronico: string): Promise<Usuario | null>
+  findByCorreoElectronico(correoElectronico: string): Promise<Partial<Usuario> | null>
 
-  findAllForSync(lastSync: Date): Promise<Usuario[]>
+  findForAuthByCorreoElectronico(correoElectronico: string): Promise<UsuarioForAuth | null>
 
-  findAllForPagination(params: PaginatedParams): Promise<{ data: Usuario[]; total: number }>
+  findAllForSync(lastSync: Date): Promise<Partial<Usuario>[]>
+
+  findAllForPagination(params: PaginatedParams): Promise<{ data: Partial<Usuario>[]; total: number }>
 
   update(params: UsuarioUpdateParams): Promise<void>
 

@@ -30,7 +30,6 @@ describe('UsuariosController', () => {
     rol: Rol.ADMINISTRADOR,
     nombre: 'JUAN PEREZ',
     correoElectronico: 'admin@lemon.pe',
-    contrasena: '123456',
     activo: true,
     createdAt: new Date(),
     updatedAt: new Date(),
