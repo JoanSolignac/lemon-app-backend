@@ -1,5 +1,5 @@
 import { registerAs } from "@nestjs/config";
 
-export const appConfig = registerAs('app', () => ({
+export const APP_CONFIG = registerAs('app', () => ({
     port: process.env.PORT,
-}))
+}));
