@@ -8,6 +8,7 @@ import { APP_CONFIG } from './config/app.config';
 import { DATABASE_CONFIG } from './config/database.config';
 import { JWT_CONFIG } from './config/jwt.config';
 import { HashModule } from './hash/hash.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { HashModule } from './hash/hash.module';
     PrismaModule,
     ClientesModule,
     UsuariosModule,
-    HashModule
+    HashModule,
+    AuthModule
   ],
 })
 export class AppModule {}
