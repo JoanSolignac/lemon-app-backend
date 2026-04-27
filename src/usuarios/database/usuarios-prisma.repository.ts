@@ -4,6 +4,9 @@ import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { USUARIO_CORREO_ELECTRONICO_CONFLICT, USUARIO_ID_CONFLICT } from '../errors/usuarios.errors';
 import { IUsuariosRepository } from '../repositories/usuarios.repository';
+import { UsuarioForAuth } from '../types/usuario-for-auth.type';
+import { SELECT_USUARIO_FOR_AUTH } from '../types/usuario-for-auth-select.type';
+import { SELECT_USUARIOS } from '../types/usuario-select.type';
 import { Usuario } from '../types/usuario.type';
 import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 
@@ -11,7 +14,7 @@ import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 export class UsuariosPrismaRepository implements IUsuariosRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Usuario): Promise<Usuario> {
+  async create(data: Usuario): Promise<Partial<Usuario>> {
     try {
       return await this.prisma.usuario.create({
         data: {
@@ -23,25 +26,35 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
           activo: data.activo,
           deletedAt: data.deletedAt ?? null,
         },
+        select: SELECT_USUARIOS,
       });
     } catch (error: unknown) {
       this.handlePrismaError(error);
     }
   }
 
-  async findById(id: string): Promise<Usuario | null> {
+  async findById(id: string): Promise<Partial<Usuario> | null> {
     return this.prisma.usuario.findFirst({
       where: { id, deletedAt: null },
+      select: SELECT_USUARIOS,
     });
   }
 
-  async findByCorreoElectronico(correoElectronico: string): Promise<Usuario | null> {
+  async findByCorreoElectronico(correoElectronico: string): Promise<Partial<Usuario> | null> {
     return this.prisma.usuario.findFirst({
       where: { correoElectronico, deletedAt: null },
+      select: SELECT_USUARIOS,
     });
   }
 
-  async findAllForSync(lastSync: Date): Promise<Usuario[]> {
+  async findForAuthByCorreoElectronico(correoElectronico: string): Promise<UsuarioForAuth | null> {
+    return this.prisma.usuario.findFirst({
+      where: { correoElectronico, deletedAt: null },
+      select: SELECT_USUARIO_FOR_AUTH,
+    });
+  }
+
+  async findAllForSync(lastSync: Date): Promise<Partial<Usuario>[]> {
     return this.prisma.usuario.findMany({
       where: {
         updatedAt: {
@@ -52,10 +65,11 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
         { updatedAt: 'asc' },
         { id: 'asc' },
       ],
+      select: SELECT_USUARIOS,
     });
   }
 
-  async findAllForPagination(params: PaginatedParams): Promise<{ data: Usuario[]; total: number }> {
+  async findAllForPagination(params: PaginatedParams): Promise<{ data: Partial<Usuario>[]; total: number }> {
     const { skip, take } = params;
     const where = { deletedAt: null };
 
@@ -68,6 +82,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
           { nombre: 'desc' },
           { id: 'desc' },
         ],
+        select: SELECT_USUARIOS,
       }),
       this.prisma.usuario.count({
         where,

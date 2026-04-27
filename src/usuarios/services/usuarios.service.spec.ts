@@ -15,6 +15,7 @@ describe('UsuariosService', () => {
     create: jest.fn(),
     findById: jest.fn(),
     findByCorreoElectronico: jest.fn(),
+    findForAuthByCorreoElectronico: jest.fn(),
     findAllForSync: jest.fn(),
     findAllForPagination: jest.fn(),
     update: jest.fn(),
@@ -38,12 +39,31 @@ describe('UsuariosService', () => {
     contrasena: '123456',
   };
 
+  const usuarioResponseMock = {
+    id: ID_USUARIO,
+    rol: Rol.ADMINISTRADOR,
+    nombre: NOMBRE,
+    correoElectronico: CORREO_ELECTRONICO,
+    activo: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  };
+
   const usuarioMock = {
     ...createDto,
     activo: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
+  };
+
+  const usuarioForAuthMock = {
+    id: ID_USUARIO,
+    rol: Rol.ADMINISTRADOR,
+    correoElectronico: CORREO_ELECTRONICO,
+    contrasena: '123456',
+    activo: true,
   };
 
   beforeEach(async () => {
@@ -66,7 +86,7 @@ describe('UsuariosService', () => {
 
   describe('create', () => {
     it('debe crear un nuevo usuario', async () => {
-      usuarioRepository.create.mockResolvedValue(usuarioMock);
+      usuarioRepository.create.mockResolvedValue(usuarioResponseMock);
 
       const result = await usuariosService.create(createDto);
 
@@ -80,7 +100,7 @@ describe('UsuariosService', () => {
           updatedAt: expect.any(Date),
         }),
       );
-      expect(result).toEqual(usuarioMock);
+      expect(result).toEqual(usuarioResponseMock);
     });
 
     it('debe propagar conflicto por claves unicas al crear un usuario', async () => {
@@ -94,13 +114,13 @@ describe('UsuariosService', () => {
 
   describe('findById', () => {
     it('debe retornar un usuario si existe', async () => {
-      usuarioRepository.findById.mockResolvedValue(usuarioMock);
+      usuarioRepository.findById.mockResolvedValue(usuarioResponseMock);
 
       const result = await usuariosService.findById(ID_USUARIO);
 
       expect(usuarioRepository.findById).toHaveBeenCalledWith(ID_USUARIO);
       expect(usuarioRepository.findById).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(usuarioMock);
+      expect(result).toEqual(usuarioResponseMock);
     });
 
     it('debe retornar null si el usuario no existe', async () => {
@@ -116,13 +136,13 @@ describe('UsuariosService', () => {
 
   describe('findByCorreoElectronico', () => {
     it('debe retornar un usuario por correo electronico', async () => {
-      usuarioRepository.findByCorreoElectronico.mockResolvedValue(usuarioMock);
+      usuarioRepository.findByCorreoElectronico.mockResolvedValue(usuarioResponseMock);
 
       const result = await usuariosService.findByCorreoElectronico(CORREO_ELECTRONICO);
 
       expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledWith(CORREO_ELECTRONICO);
       expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(usuarioMock);
+      expect(result).toEqual(usuarioResponseMock);
     });
 
     it('debe retornar null si no existe usuario con el correo electronico', async () => {
@@ -136,30 +156,52 @@ describe('UsuariosService', () => {
     });
   });
 
+  describe('findForAuthByCorreoElectronico', () => {
+    it('debe retornar un usuario con credenciales para autenticación', async () => {
+      usuarioRepository.findForAuthByCorreoElectronico.mockResolvedValue(usuarioForAuthMock);
+
+      const result = await usuariosService.findForAuthByCorreoElectronico(CORREO_ELECTRONICO);
+
+      expect(usuarioRepository.findForAuthByCorreoElectronico).toHaveBeenCalledWith(CORREO_ELECTRONICO);
+      expect(usuarioRepository.findForAuthByCorreoElectronico).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(usuarioForAuthMock);
+    });
+
+    it('debe retornar null si no existe usuario para autenticación', async () => {
+      usuarioRepository.findForAuthByCorreoElectronico.mockResolvedValue(null);
+
+      const result = await usuariosService.findForAuthByCorreoElectronico(CORREO_ELECTRONICO);
+
+      expect(usuarioRepository.findForAuthByCorreoElectronico).toHaveBeenCalledWith(CORREO_ELECTRONICO);
+      expect(usuarioRepository.findForAuthByCorreoElectronico).toHaveBeenCalledTimes(1);
+      expect(result).toBeNull();
+    });
+  });
+
   describe('findAllForSync', () => {
     it('debe delegar la búsqueda de cambios desde la última sincronización', async () => {
       const lastSync = new Date();
-      usuarioRepository.findAllForSync.mockResolvedValue([usuarioMock]);
+      usuarioRepository.findAllForSync.mockResolvedValue([usuarioResponseMock]);
 
       const result = await usuariosService.findAllForSync(lastSync);
 
       expect(usuarioRepository.findAllForSync).toHaveBeenCalledWith(lastSync);
       expect(usuarioRepository.findAllForSync).toHaveBeenCalledTimes(1);
-      expect(result).toEqual([usuarioMock]);
+      expect(result).toEqual([usuarioResponseMock]);
     });
   });
 
   describe('findAllPaginated', () => {
     it('debe retornar usuarios paginados', async () => {
       const dto: PaginatedQueryDto = { page: 2, limit: 10 };
-      usuarioRepository.findAllForPagination.mockResolvedValue({ data: [usuarioMock], total: 25 });
+      usuarioRepository.findAllForPagination.mockResolvedValue({ data: [usuarioResponseMock], total: 25 });
 
       const result = await usuariosService.findAllPaginated(dto);
 
       expect(usuarioRepository.findAllForPagination).toHaveBeenCalledWith({ skip: 10, take: 10 });
       expect(usuarioRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        data: [usuarioMock],
+        data: [usuarioResponseMock],
         page: 2,
         limit: 10,
         total: 25,
