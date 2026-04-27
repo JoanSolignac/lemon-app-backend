@@ -61,7 +61,6 @@ describe('UsuariosController', () => {
   describe('create', () => {
     it('debe crear un usuario', async () => {
       const dto: CreateUsuarioDto = {
-        id: 'usr-001',
         rol: Rol.ADMINISTRADOR,
         nombre: 'JUAN PEREZ',
         correoElectronico: 'admin@lemon.pe',

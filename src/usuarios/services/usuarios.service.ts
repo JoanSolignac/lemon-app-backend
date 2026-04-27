@@ -19,8 +19,7 @@ export class UsuariosService {
 
   async create(dto: CreateUsuarioDto): Promise<UsuarioResponseDto> {
     const now = new Date();
-    const usuario: Usuario = {
-      id: dto.id,
+    const usuario: Omit<Usuario, 'id'> = {
       rol: dto.rol,
       nombre: dto.nombre,
       correoElectronico: dto.correoElectronico,

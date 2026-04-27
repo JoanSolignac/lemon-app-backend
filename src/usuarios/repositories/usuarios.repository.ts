@@ -4,7 +4,7 @@ import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 import { Usuario } from '../types/usuario.type';
 
 export interface IUsuariosRepository {
-  create(data: Usuario): Promise<Partial<Usuario>>
+  create(data: Omit<Usuario, 'id'>): Promise<Partial<Usuario>>
 
   findById(id: string): Promise<Partial<Usuario> | null>
 
