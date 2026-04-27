@@ -1,0 +1,1 @@
+export const HASH_STRATEGY = Symbol('HashStrategy');

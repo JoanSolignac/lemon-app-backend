@@ -7,6 +7,7 @@ import { VALIDATION_SCHEMA } from './config/validation.schema';
 import { APP_CONFIG } from './config/app.config';
 import { DATABASE_CONFIG } from './config/database.config';
 import { JWT_CONFIG } from './config/jwt.config';
+import { HashModule } from './hash/hash.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { JWT_CONFIG } from './config/jwt.config';
     }),
     PrismaModule,
     ClientesModule,
-    UsuariosModule
+    UsuariosModule,
+    HashModule
   ],
 })
 export class AppModule {}
