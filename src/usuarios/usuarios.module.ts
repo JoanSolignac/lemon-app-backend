@@ -13,5 +13,6 @@ import { UsuariosService } from './services/usuarios.service';
     },
     UsuariosService,
   ],
+  exports: [UsuariosService],
 })
 export class UsuariosModule {}
