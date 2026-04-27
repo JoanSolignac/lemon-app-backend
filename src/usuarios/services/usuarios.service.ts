@@ -9,21 +9,24 @@ import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import type { IUsuariosRepository } from '../repositories/usuarios.repository';
 import { UsuarioForAuth } from '../types/usuario-for-auth.type';
 import { Usuario } from '../types/usuario.type';
+import { HashService } from 'src/hash/services/hash.service';
 
 @Injectable()
 export class UsuariosService {
   constructor(
     @Inject(IUSUARIO_REPOSITORY)
     private readonly usuarioRepository: IUsuariosRepository,
+    private readonly hashService: HashService,
   ) {}
 
   async create(dto: CreateUsuarioDto): Promise<UsuarioResponseDto> {
     const now = new Date();
+    const hashedPassword = await this.hashService.hash(dto.contrasena);
     const usuario: Omit<Usuario, 'id'> = {
       rol: dto.rol,
       nombre: dto.nombre,
       correoElectronico: dto.correoElectronico,
-      contrasena: dto.contrasena,
+      contrasena: hashedPassword,
       activo: true,
       createdAt: now,
       updatedAt: now,
@@ -71,13 +74,15 @@ export class UsuariosService {
   }
 
   async update(id: string, dto: UpdateUsuarioDto): Promise<void> {
+    const hashedPassword = dto.contrasena ? await this.hashService.hash(dto.contrasena) : undefined;
+
     await this.usuarioRepository.update({
       id,
       data: {
         rol: dto.rol,
         nombre: dto.nombre,
         correoElectronico: dto.correoElectronico,
-        contrasena: dto.contrasena,
+        contrasena: hashedPassword,
         activo: dto.activo,
       },
     });

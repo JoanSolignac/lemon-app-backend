@@ -6,10 +6,14 @@ import { IUSUARIO_REPOSITORY } from '../constants/usuarios.constant';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import { IUsuariosRepository } from '../repositories/usuarios.repository';
+import { HashService } from 'src/hash/services/hash.service';
 import { UsuariosService } from './usuarios.service';
 
 describe('UsuariosService', () => {
   let usuariosService: UsuariosService;
+  const hashService = {
+    hash: jest.fn(),
+  } as unknown as jest.Mocked<HashService>;
 
   const usuarioRepository: jest.Mocked<IUsuariosRepository> = {
     create: jest.fn(),
@@ -73,6 +77,10 @@ describe('UsuariosService', () => {
           provide: IUSUARIO_REPOSITORY,
           useValue: usuarioRepository,
         },
+        {
+          provide: HashService,
+          useValue: hashService,
+        },
       ],
     }).compile();
 
@@ -85,17 +93,20 @@ describe('UsuariosService', () => {
 
   describe('create', () => {
     it('debe crear un nuevo usuario', async () => {
+      const hashedPassword = 'hashed-123456';
+      hashService.hash.mockResolvedValue(hashedPassword);
       usuarioRepository.create.mockResolvedValue(usuarioResponseMock);
 
       const result = await usuariosService.create(createDto);
 
+      expect(hashService.hash).toHaveBeenCalledWith(createDto.contrasena);
       expect(usuarioRepository.create).toHaveBeenCalledTimes(1);
       expect(usuarioRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           rol: createDto.rol,
           nombre: createDto.nombre,
           correoElectronico: createDto.correoElectronico,
-          contrasena: createDto.contrasena,
+          contrasena: hashedPassword,
           activo: true,
           deletedAt: null,
           createdAt: expect.any(Date),
@@ -237,15 +248,43 @@ describe('UsuariosService', () => {
     };
 
     it('debe actualizar un usuario', async () => {
+      const hashedPassword = 'hashed-654321';
+      hashService.hash.mockResolvedValue(hashedPassword);
       usuarioRepository.update.mockResolvedValue();
 
       const result = await usuariosService.update(ID_USUARIO, updateDto);
 
+      expect(hashService.hash).toHaveBeenCalledWith(updateDto.contrasena!);
       expect(usuarioRepository.update).toHaveBeenCalledWith({
         id: ID_USUARIO,
-        data: updateDto,
+        data: {
+          ...updateDto,
+          contrasena: hashedPassword,
+        },
       });
       expect(result).toBeUndefined();
+    });
+
+    it('no debe actualizar la contraseña si no se envía', async () => {
+      const dto: UpdateUsuarioDto = {
+        nombre: NOMBRE,
+        correoElectronico: CORREO_ELECTRONICO,
+      };
+
+      usuarioRepository.update.mockResolvedValue();
+
+      await usuariosService.update(ID_USUARIO, dto);
+
+      expect(hashService.hash).not.toHaveBeenCalled();
+
+      expect(usuarioRepository.update).toHaveBeenCalledWith({
+        id: ID_USUARIO,
+        data: {
+          nombre: dto.nombre,
+          correoElectronico: dto.correoElectronico,
+          contrasena: undefined, // importante
+        },
+      });
     });
 
     it('debe propagar conflicto por claves unicas al actualizar un usuario', async () => {
