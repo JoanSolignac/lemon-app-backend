@@ -7,9 +7,6 @@ enum Rol {
 }
 
 export class CreateUsuarioDto {
-  @IsString()
-  readonly id!: string;
-
   @IsEnum(Rol)
   readonly rol!: Rol;
 

@@ -14,11 +14,10 @@ import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 export class UsuariosPrismaRepository implements IUsuariosRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Usuario): Promise<Partial<Usuario>> {
+  async create(data: Omit<Usuario, 'id'>): Promise<Partial<Usuario>> {
     try {
       return await this.prisma.usuario.create({
         data: {
-          id: data.id,
           rol: data.rol,
           nombre: data.nombre,
           correoElectronico: data.correoElectronico,

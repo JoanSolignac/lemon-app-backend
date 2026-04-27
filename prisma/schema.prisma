@@ -42,7 +42,7 @@ enum TipoCliente {
 }
 
 model Usuario {
-  id                String      @id
+  id                String      @id @default(uuid())
   rol               Rol      
   nombre            String      
   correoElectronico String      @unique

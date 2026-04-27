@@ -27,12 +27,11 @@ describe('UsuariosService', () => {
     SUPERVISOR = 'SUPERVISOR',
   }
 
-  const ID_USUARIO = 'usr-001';
+  const ID_USUARIO = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
   const CORREO_ELECTRONICO = 'admin@lemon.pe';
   const NOMBRE = 'JUAN PEREZ';
 
   const createDto: CreateUsuarioDto = {
-    id: ID_USUARIO,
     rol: Rol.ADMINISTRADOR,
     nombre: NOMBRE,
     correoElectronico: CORREO_ELECTRONICO,
@@ -93,7 +92,10 @@ describe('UsuariosService', () => {
       expect(usuarioRepository.create).toHaveBeenCalledTimes(1);
       expect(usuarioRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          ...createDto,
+          rol: createDto.rol,
+          nombre: createDto.nombre,
+          correoElectronico: createDto.correoElectronico,
+          contrasena: createDto.contrasena,
           activo: true,
           deletedAt: null,
           createdAt: expect.any(Date),
