@@ -1,11 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { HashModule } from 'src/hash/hash.module';
 import { UsuariosModule } from 'src/usuarios/usuarios.module';
+import { AuthController } from './controllers/auth.controller';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { RolGuard } from './guards/rol.guard';
+import { AuthService } from './services/auth.service';
+import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
+import { JwtAccessGuard } from './guards/jwt-access.guard';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 @Module({
     imports: [
+        PassportModule.register({ defaultStrategy: 'jwt-access' }),
         JwtModule.registerAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -18,6 +27,23 @@ import { UsuariosModule } from 'src/usuarios/usuarios.module';
         }),
         UsuariosModule,
         HashModule,
+    ],
+    controllers: [AuthController],
+    providers: [
+        AuthService,
+        JwtAccessStrategy,
+        JwtRefreshStrategy,
+        JwtAccessGuard,
+        JwtRefreshGuard,
+        RolGuard,
+    ],
+    exports: [
+        AuthService,
+        JwtAccessGuard,
+        JwtRefreshGuard,
+        RolGuard,
+        PassportModule,
+        JwtModule,
     ],
 })
 export class AuthModule {}

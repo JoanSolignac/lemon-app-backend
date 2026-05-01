@@ -1,6 +1,6 @@
 export type Usuario = {
   id: string
-  rol: 'ADMINISTRADOR' | 'SUPERVISOR'
+  rol: Rol
   nombre: string
   correoElectronico: string
   contrasena: string
@@ -8,4 +8,9 @@ export type Usuario = {
   createdAt: Date
   updatedAt: Date
   deletedAt?: Date | null
+}
+
+export enum Rol {
+  ADMINISTRADOR = 'ADMINISTRADOR',
+  SUPERVISOR = 'SUPERVISOR',
 }
