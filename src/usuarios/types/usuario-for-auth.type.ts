@@ -1,6 +1,8 @@
+import { Rol } from "./usuario.type"
+
 export type UsuarioForAuth = {
   id: string
-  rol: 'ADMINISTRADOR' | 'SUPERVISOR'
+  rol: Rol
   correoElectronico: string
   contrasena: string
   activo: boolean

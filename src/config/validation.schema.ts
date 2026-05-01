@@ -19,4 +19,14 @@ export const VALIDATION_SCHEMA = Joi.object({
         .string()
         .pattern(/^\d+(s|m|h|d)$/)
         .default('1h'),
+
+    JWT_REFRESH_SECRET: Joi
+        .string()
+        .min(32)
+        .required(),
+
+    JWT_REFRESH_EXPIRES_IN: Joi
+        .string()
+        .pattern(/^\d+(s|m|h|d)$/)
+        .default('7d'),
 });
