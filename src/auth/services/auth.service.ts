@@ -51,7 +51,7 @@ export class AuthService {
             this.jwtService.signAsync(payload),
             this.jwtService.signAsync(payload, {
                 secret: this.configService.getOrThrow<string>('jwt.refreshSecret'),
-                expiresIn: this.configService.getOrThrow<string>('jwt.refreshExpiresIn'),
+                expiresIn: this.configService.getOrThrow('jwt.refreshExpiresIn'),
             }),
         ]);
 
