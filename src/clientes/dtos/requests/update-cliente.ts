@@ -1,18 +1,8 @@
 import { Transform } from 'class-transformer';
 import { IsEmail, IsEnum, IsInt, IsOptional, IsString, Length } from 'class-validator';
-
-enum TipoDocumento {
-  DNI = 'DNI',
-  RUC = 'RUC'
-}
-
-enum TipoCliente {
-  MINORISTA = 'MINORISTA',
-  MAYORISTA = 'MAYORISTA'
-}
+import { TipoDocumento, TipoCliente } from 'src/clientes/types/cliente.type';
 
 export class UpdateClienteDto {
-
   @IsOptional()
   @IsString()
   @Length(3, 150)

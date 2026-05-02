@@ -1,13 +1,15 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ClientesService } from './clientes.service';
+import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
+import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { ICLIENTE_REPOSITORY } from '../constants/cliente.constants';
 import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
 import { UpdateClienteDto } from '../dtos/requests/update-cliente';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
-import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
-import { ConflictException } from '@nestjs/common';
 import { IClientesRepository } from '../repositories/clientes.repository';
+import { TipoDocumento, TipoCliente } from '../types/cliente.type';
+import { ClientesService } from './clientes.service';
 
 describe('ClientesService', () => {
   let clienteService: ClientesService;
@@ -22,16 +24,7 @@ describe('ClientesService', () => {
     softDelete: jest.fn(),
   };
 
-  enum TipoDocumento {
-    DNI = 'DNI',
-    RUC = 'RUC'
-  }
-  enum TipoCliente {
-    MINORISTA = 'MINORISTA',
-    MAYORISTA = 'MAYORISTA'
-  }
-
-  const ID_CLIENTE = 'cli-001';
+  const ID_CLIENTE = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
   const NUMERO_DOCUMENTO = '20123456781';
   const RAZON_SOCIAL = 'LEMON SAC';
 
@@ -150,11 +143,11 @@ describe('ClientesService', () => {
 
   describe('findAllForSync', () => {
     it('debe delegar la búsqueda de cambios desde la última sincronización', async () => {
-      const lastSync = new Date();
+      const dto: SyncQueryDto = { lastSync: new Date() };
       clienteRepository.findAllForSync.mockResolvedValue([clienteMock]);
 
-      const result = await clienteService.findAllForSync(lastSync);
-      expect(clienteRepository.findAllForSync).toHaveBeenCalledWith(lastSync);
+      const result = await clienteService.findAllForSync(dto);
+      expect(clienteRepository.findAllForSync).toHaveBeenCalledWith(dto);
       expect(clienteRepository.findAllForSync).toHaveBeenCalledTimes(1);
       expect(result).toEqual([clienteMock]);
     });

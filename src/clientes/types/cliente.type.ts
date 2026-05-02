@@ -1,9 +1,19 @@
+export enum TipoDocumento {
+  DNI = 'DNI',
+  RUC = 'RUC',
+}
+
+export enum TipoCliente {
+  MINORISTA = 'MINORISTA',
+  MAYORISTA = 'MAYORISTA',
+}
+
 export type Cliente = {
   id: string
   razonSocial: string
-  tipoDocumento: 'DNI' | 'RUC'
+  tipoDocumento: TipoDocumento
   numeroDocumento: string
-  tipoCliente: 'MINORISTA' | 'MAYORISTA'
+  tipoCliente: TipoCliente
   numeroTelefono: string
   correoElectronico?: string | null
   direccion: string
