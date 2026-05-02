@@ -1,4 +1,4 @@
 export class AccessTokenDto {
-    accessToken!: string;
-    refreshToken!: string;
+    readonly accessToken!: string;
+    readonly refreshToken!: string;
 }
