@@ -5,12 +5,12 @@ import { PassportModule } from '@nestjs/passport';
 import { HashModule } from 'src/hash/hash.module';
 import { UsuariosModule } from 'src/usuarios/usuarios.module';
 import { AuthController } from './controllers/auth.controller';
-import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
-import { RolGuard } from './guards/rol.guard';
 import { AuthService } from './services/auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
-import { JwtAccessGuard } from './guards/jwt-access.guard';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { JwtAccessGuard } from 'src/common/guards/jwt-access.guard';
+import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
+import { RolGuard } from 'src/common/guards/rol.guard';
 
 @Module({
     imports: [

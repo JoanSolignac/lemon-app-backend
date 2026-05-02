@@ -1,4 +1,5 @@
-import type { Rol, Usuario } from '../../types/usuario.type';
+import { Rol } from 'src/common/types/user-role.enum';
+import type { Usuario } from '../../types/usuario.type';
 
 export class UsuarioResponseDto {
   readonly id!: string;

@@ -1,4 +1,5 @@
-import { Rol } from "./usuario.type"
+import { Rol } from "src/common/types/user-role.enum"
+
 
 export type UsuarioForAuth = {
   id: string

@@ -6,8 +6,8 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { UnauthorizedException } from '@nestjs/common';
 import { HashService } from 'src/hash/services/hash.service';
 import { UsuariosService } from 'src/usuarios/services/usuarios.service';
-import { Rol } from 'src/usuarios/types/usuario.type';
 import { LoginDto } from '../dtos/requests/login.dto';
+import { Rol } from 'src/common/types/user-role.enum';
 
 describe('AuthService', () => {
   let authService: AuthService;

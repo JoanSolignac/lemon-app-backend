@@ -9,6 +9,7 @@ import { DATABASE_CONFIG } from './config/database.config';
 import { JWT_CONFIG } from './config/jwt.config';
 import { HashModule } from './hash/hash.module';
 import { AuthModule } from './auth/auth.module';
+import { DispositivosModule } from './dispositivos/dispositivos.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { AuthModule } from './auth/auth.module';
     ClientesModule,
     UsuariosModule,
     HashModule,
-    AuthModule
+    AuthModule,
+    DispositivosModule
   ],
 })
 export class AppModule {}
