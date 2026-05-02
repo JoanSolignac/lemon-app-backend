@@ -32,7 +32,7 @@ model Usuario {
 model Dispositivo {
   deviceId String @id @map("device_id")
 
-  userId String? @map("user_id")
+  userId String @map("user_id")
 
   activo Boolean @default(true)
 

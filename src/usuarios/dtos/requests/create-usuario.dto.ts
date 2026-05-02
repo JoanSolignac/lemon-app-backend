@@ -1,7 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsEmail, IsEnum, IsString, Length } from 'class-validator';
-import { Rol } from 'src/usuarios/types/usuario.type';
-
+import { Rol } from 'src/common/types/user-role.enum';
 export class CreateUsuarioDto {
   @IsEnum(Rol)
   readonly rol!: Rol;

@@ -1,3 +1,5 @@
+import { Rol } from "src/common/types/user-role.enum"
+
 export type Usuario = {
   id: string
   rol: Rol
@@ -8,9 +10,4 @@ export type Usuario = {
   createdAt: Date
   updatedAt: Date
   deletedAt?: Date | null
-}
-
-export enum Rol {
-  ADMINISTRADOR = 'ADMINISTRADOR',
-  SUPERVISOR = 'SUPERVISOR',
 }

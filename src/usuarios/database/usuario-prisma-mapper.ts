@@ -1,8 +1,9 @@
 import { Prisma } from "@prisma/client";
-import { Rol, Usuario } from "../types/usuario.type";
+import { Usuario } from "../types/usuario.type";
 import { SELECT_USUARIOS } from "../types/usuario-select.type";
 import { SELECT_USUARIO_FOR_AUTH } from "../types/usuario-for-auth-select.type";
 import { UsuarioForAuth } from "../types/usuario-for-auth.type";
+import { Rol } from "src/common/types/user-role.enum";
 
 type PrismaUsuario = Prisma.UsuarioGetPayload<{}>;
 type PrismaSelectUsuario = Prisma.UsuarioGetPayload<{ select: typeof SELECT_USUARIOS }>;

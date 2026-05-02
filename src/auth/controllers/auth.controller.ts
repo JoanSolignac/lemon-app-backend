@@ -2,10 +2,10 @@ import { Body, Controller, HttpCode, Post, Req, UseGuards } from '@nestjs/common
 import { Request } from 'express';
 import { LoginDto } from '../dtos/requests/login.dto';
 import { AccessTokenDto } from '../dtos/responses/access-token.dto';
-import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';
-import type { UserPayload } from '../interfaces/jwt-payload.interface';
+import type { UserPayload } from '../../common/interfaces/jwt-payload.interface';
 import { AuthService } from '../services/auth.service';
-import { GetMe } from '../decorators/get-me.decorator';
+import { GetMe } from '../../common/decorators/get-me.decorator';
+import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {

@@ -5,7 +5,7 @@ import { HashService } from 'src/hash/services/hash.service';
 import { UsuariosService } from 'src/usuarios/services/usuarios.service';
 import { LoginDto } from '../dtos/requests/login.dto';
 import { UsuarioForAuth } from 'src/usuarios/types/usuario-for-auth.type';
-import { UserPayload } from '../interfaces/jwt-payload.interface';
+import { UserPayload } from '../../common/interfaces/jwt-payload.interface';
 import { AccessTokenDto } from '../dtos/responses/access-token.dto';
 
 @Injectable()

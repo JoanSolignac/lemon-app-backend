@@ -1,4 +1,5 @@
-import { Rol } from "src/usuarios/types/usuario.type";
+import { Rol } from "../types/user-role.enum";
+
 
 export interface UserPayload {
     sub: string,

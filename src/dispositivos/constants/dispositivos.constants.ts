@@ -1,0 +1,1 @@
+export const IDISPOSITIVO_REPOSITORY = Symbol('IDispositivoRepository');
