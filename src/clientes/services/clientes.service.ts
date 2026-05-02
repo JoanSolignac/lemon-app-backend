@@ -1,13 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
+import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
+import { PaginatedResult } from 'src/common/types/paginated-result.type';
+import { calculateSkipTakeForPagination, normalizePaginationDto } from 'src/common/utils/pagination.util';
+import { ICLIENTE_REPOSITORY } from '../constants/cliente.constants';
+import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
+import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
+import { UpdateClienteDto } from '../dtos/requests/update-cliente';
+import { ClienteResponseDto } from '../dtos/responses/cliente-response.dto';
 import type { IClientesRepository } from '../repositories/clientes.repository';
 import { Cliente } from '../types/cliente.type';
-import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
-import { PaginatedResult } from 'src/common/types/paginated-result.type';
-import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
-import { calculateSkipTakeForPagination, normalizePaginationDto } from 'src/common/utils/pagination.util';
-import { UpdateClienteDto } from '../dtos/requests/update-cliente';
-import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
-import { ICLIENTE_REPOSITORY } from '../constants/cliente.constants';
 
 @Injectable()
 export class ClientesService {
@@ -16,7 +18,7 @@ export class ClientesService {
     private readonly clienteRepository: IClientesRepository,
   ) {}
 
-  async create(dto: CreateClienteDto): Promise<Cliente> {
+  async create(dto: CreateClienteDto): Promise<ClienteResponseDto> {
     const now = new Date();
     const cliente: Cliente = {
       id: dto.id,
@@ -34,28 +36,36 @@ export class ClientesService {
       deletedAt: null,
     };
 
-    return this.clienteRepository.create(cliente);
+    const createdCliente = await this.clienteRepository.create(cliente);
+
+    return this.toResponse(createdCliente);
   }
 
-  async findById(id: string): Promise<Cliente | null> {
-    return this.clienteRepository.findById(id);
+  async findById(id: string): Promise<ClienteResponseDto | null> {
+    const cliente = await this.clienteRepository.findById(id);
+
+    return cliente ? this.toResponse(cliente) : null;
   }
 
-  async findByNumeroDocumento(numeroDocumento: string): Promise<Cliente | null> {
-    return this.clienteRepository.findByNumeroDocumento(numeroDocumento);
+  async findByNumeroDocumento(numeroDocumento: string): Promise<ClienteResponseDto | null> {
+    const cliente = await this.clienteRepository.findByNumeroDocumento(numeroDocumento);
+
+    return cliente ? this.toResponse(cliente) : null;
   }
 
-  async findAllForSync(lastSync: Date): Promise<Cliente[]> {
-    return this.clienteRepository.findAllForSync(lastSync);
+  async findAllForSync(dto: SyncQueryDto): Promise<ClienteResponseDto[]> {
+    const clientes = await this.clienteRepository.findAllForSync(dto);
+
+    return clientes.map((c) => this.toResponse(c));
   }
 
-  async findAllPaginated(dto: PaginatedQueryDto): Promise<PaginatedResult<Cliente>> {
+  async findAllPaginated(dto: PaginatedQueryDto): Promise<PaginatedResult<ClienteResponseDto>> {
     const { page, limit } = normalizePaginationDto(dto);
     const { skip, take } = calculateSkipTakeForPagination({ page, limit });
     const { data, total } = await this.clienteRepository.findAllForPagination({ skip, take });
 
     return {
-      data,
+      data: data.map((c) => this.toResponse(c)),
       page,
       limit,
       total,
@@ -83,5 +93,23 @@ export class ClientesService {
       id,
       version: dto.version,
     });
+  }
+
+  private toResponse(cliente: Cliente): ClienteResponseDto {
+    return {
+      id: cliente.id,
+      razonSocial: cliente.razonSocial,
+      tipoDocumento: cliente.tipoDocumento,
+      numeroDocumento: cliente.numeroDocumento,
+      tipoCliente: cliente.tipoCliente,
+      numeroTelefono: cliente.numeroTelefono,
+      correoElectronico: cliente.correoElectronico ?? null,
+      direccion: cliente.direccion,
+      activo: cliente.activo,
+      version: cliente.version,
+      createdAt: cliente.createdAt,
+      updatedAt: cliente.updatedAt,
+      deletedAt: cliente.deletedAt ?? null,
+    };
   }
 }

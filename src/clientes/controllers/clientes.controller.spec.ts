@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { BadRequestException, ParseUUIDPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
+import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
-import { SyncQueryDto } from '../../common/dtos/requests/sync-query.dto';
 import { UpdateClienteDto } from '../dtos/requests/update-cliente';
 import { ClientesService } from '../services/clientes.service';
+import { TipoDocumento, TipoCliente } from '../types/cliente.type';
 import { ClientesController } from './clientes.controller';
 
 describe('ClientesController', () => {
@@ -21,18 +23,10 @@ describe('ClientesController', () => {
     delete: jest.fn(),
   } as unknown as jest.Mocked<ClientesService>;
 
-  enum TipoDocumento {
-    DNI = 'DNI',
-    RUC = 'RUC',
-  }
-
-  enum TipoCliente {
-    MINORISTA = 'MINORISTA',
-    MAYORISTA = 'MAYORISTA',
-  }
+  const ID_CLIENTE = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
 
   const clienteMock = {
-    id: 'cli-001',
+    id: ID_CLIENTE,
     razonSocial: 'LEMON SAC',
     tipoDocumento: TipoDocumento.RUC,
     numeroDocumento: '20123456781',
@@ -72,7 +66,7 @@ describe('ClientesController', () => {
   describe('create', () => {
     it('debe crear un cliente', async () => {
       const dto: CreateClienteDto = {
-        id: 'cli-001',
+        id: ID_CLIENTE,
         razonSocial: 'LEMON SAC',
         tipoDocumento: TipoDocumento.RUC,
         numeroDocumento: '20123456781',
@@ -94,9 +88,9 @@ describe('ClientesController', () => {
     it('debe retornar un cliente por id', async () => {
       clientesService.findById.mockResolvedValue(clienteMock);
 
-      const result = await controller.findById('cli-001');
+      const result = await controller.findById(ID_CLIENTE);
 
-      expect(clientesService.findById).toHaveBeenCalledWith('cli-001');
+      expect(clientesService.findById).toHaveBeenCalledWith(ID_CLIENTE);
       expect(result).toEqual(clienteMock);
     });
   });
@@ -119,7 +113,7 @@ describe('ClientesController', () => {
 
       const result = await controller.findAllForSync(dto);
 
-      expect(clientesService.findAllForSync).toHaveBeenCalledWith(dto.lastSync);
+      expect(clientesService.findAllForSync).toHaveBeenCalledWith(dto);
       expect(result).toEqual([clienteMock]);
     });
   });
@@ -150,9 +144,9 @@ describe('ClientesController', () => {
       };
       clientesService.update.mockResolvedValue();
 
-      const result = await controller.update('cli-001', dto);
+      const result = await controller.update(ID_CLIENTE, dto);
 
-      expect(clientesService.update).toHaveBeenCalledWith('cli-001', dto);
+      expect(clientesService.update).toHaveBeenCalledWith(ID_CLIENTE, dto);
       expect(result).toBeUndefined();
     });
   });
@@ -164,10 +158,38 @@ describe('ClientesController', () => {
       };
       clientesService.delete.mockResolvedValue();
 
-      const result = await controller.delete('cli-001', dto);
+      const result = await controller.delete(ID_CLIENTE, dto);
 
-      expect(clientesService.delete).toHaveBeenCalledWith('cli-001', dto);
+      expect(clientesService.delete).toHaveBeenCalledWith(ID_CLIENTE, dto);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('ParseUUIDPipe', () => {
+    const pipe = new ParseUUIDPipe();
+
+    it('debe aceptar un UUID válido', async () => {
+      const validUuid = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
+
+      const result = await pipe.transform(validUuid, { type: 'param', metatype: String });
+
+      expect(result).toBe(validUuid);
+    });
+
+    it('debe lanzar BadRequestException para un ID inválido', async () => {
+      const invalidId = 'cli-001';
+
+      await expect(pipe.transform(invalidId, { type: 'param', metatype: String })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('debe lanzar BadRequestException para un UUID con formato incorrecto', async () => {
+      const malformedUuid = 'not-a-uuid';
+
+      await expect(pipe.transform(malformedUuid, { type: 'param', metatype: String })).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

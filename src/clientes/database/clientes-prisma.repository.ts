@@ -1,25 +1,28 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
 import { IClientesRepository } from '../repositories/clientes.repository';
 import { Cliente } from '../types/cliente.type';
+import { SELECT_CLIENTES } from '../types/cliente-select.type';
 import { ClienteUpdateParams } from '../types/cliente-update-params.type';
 import { SoftDeleteParams } from '../types/soft-delete-params.type';
+import { SyncQueryParams } from '../types/sync-query-params.type';
 import { CLIENTE_CORREO_ELECTRONICO_CONFLICT, CLIENTE_ID_CONFLICT, CLIENTE_NUMERO_DOCUMENTO_CONFLICT, CLIENTE_NUMERO_TELEFONO_CONFLICT } from '../errors/clientes.errors';
+import { toDomain, toDomainList, toPrismaTipoDocumento, toPrismaTipoCliente } from './cliente-prisma-mapper';
 @Injectable()
 export class ClientesPrismaRepository implements IClientesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Cliente): Promise<Cliente> {
     try {
-      return await this.prisma.cliente.create({
+      const prismaCliente = await this.prisma.cliente.create({
         data: {
           id: data.id,
           razonSocial: data.razonSocial,
-          tipoDocumento: data.tipoDocumento,
+          tipoDocumento: toPrismaTipoDocumento(data.tipoDocumento),
           numeroDocumento: data.numeroDocumento,
-          tipoCliente: data.tipoCliente,
+          tipoCliente: toPrismaTipoCliente(data.tipoCliente),
           numeroTelefono: data.numeroTelefono,
           correoElectronico: data.correoElectronico,
           direccion: data.direccion,
@@ -27,36 +30,44 @@ export class ClientesPrismaRepository implements IClientesRepository {
           version: data.version,
           deletedAt: data.deletedAt ?? null,
         },
+        select: SELECT_CLIENTES,
       });
+      return toDomain(prismaCliente);
     } catch (error: unknown) {
       this.handlePrismaError(error);
     }
   }
 
   async findById(id: string): Promise<Cliente | null> {
-    return this.prisma.cliente.findFirst({
+    const prismaCliente = await this.prisma.cliente.findFirst({
       where: { id, deletedAt: null },
+      select: SELECT_CLIENTES,
     });
+    return prismaCliente ? toDomain(prismaCliente) : null;
   }
 
   async findByNumeroDocumento(numeroDocumento: string): Promise<Cliente | null> {
-    return this.prisma.cliente.findFirst({
+    const prismaCliente = await this.prisma.cliente.findFirst({
       where: { numeroDocumento, deletedAt: null },
+      select: SELECT_CLIENTES,
     });
+    return prismaCliente ? toDomain(prismaCliente) : null;
   }
 
-  async findAllForSync(lastSync: Date): Promise<Cliente[]> {
-    return this.prisma.cliente.findMany({
+  async findAllForSync(params: SyncQueryParams): Promise<Cliente[]> {
+    const prismaClientes = await this.prisma.cliente.findMany({
       where: {
         updatedAt: {
-          gt: lastSync,
+          gt: params.lastSync,
         },
       },
       orderBy: [
         { updatedAt: 'asc' },
         { id: 'asc' },
       ],
+      select: SELECT_CLIENTES,
     });
+    return toDomainList(prismaClientes);
   }
 
   async findAllForPagination(params: PaginatedParams): Promise<{ data: Cliente[]; total: number }> {
@@ -72,13 +83,14 @@ export class ClientesPrismaRepository implements IClientesRepository {
           { razonSocial: 'desc' },
           { id: 'desc' },
         ],
+        select: SELECT_CLIENTES,
       }),
       this.prisma.cliente.count({
         where,
       }),
     ]);
 
-    return { data, total };
+    return { data: toDomainList(data), total };
   }
 
   async update(params: ClienteUpdateParams): Promise<void> {
@@ -104,7 +116,7 @@ export class ClientesPrismaRepository implements IClientesRepository {
       });
 
       if (result.count === 0) {
-        throw new ConflictException('Conflicto de version o cliente no encontrado.');
+        throw new NotFoundException('Conflicto de version o cliente no encontrado.');
       }
     } catch (error: unknown) {
       this.handlePrismaError(error);
@@ -128,12 +140,12 @@ export class ClientesPrismaRepository implements IClientesRepository {
     });
 
     if (result.count === 0) {
-      throw new ConflictException('Conflicto de version o cliente no encontrado.');
+      throw new NotFoundException('Conflicto de version o cliente no encontrado.');
     }
   }
 
   private handlePrismaError(error: unknown): never {
-    if (error instanceof ConflictException) {
+    if (error instanceof ConflictException || error instanceof NotFoundException) {
       throw error;
     }
 
@@ -175,6 +187,13 @@ export class ClientesPrismaRepository implements IClientesRepository {
           message: 'El correo electronico ya existe.',
         })
       }
+    }
+
+    /**
+     * @description Maneja errores de Prisma cuando un registro requerido no existe (P2025).
+     */
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      throw new NotFoundException('Cliente no encontrado.');
     }
 
     throw error;

@@ -1,0 +1,15 @@
+export const SELECT_CLIENTES = {
+  id: true,
+  razonSocial: true,
+  tipoDocumento: true,
+  numeroDocumento: true,
+  tipoCliente: true,
+  numeroTelefono: true,
+  correoElectronico: true,
+  direccion: true,
+  activo: true,
+  version: true,
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+} as const;
