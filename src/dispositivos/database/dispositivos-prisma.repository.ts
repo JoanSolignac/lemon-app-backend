@@ -32,7 +32,7 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
 
   async findById(deviceId: string): Promise<Dispositivo | null> {
     const prismaDispositivo = await this.prisma.dispositivo.findFirst({
-      where: { deviceId, deletedAt: null },
+      where: { deviceId },
       select: SELECT_DISPOSITIVOS,
     });
     return prismaDispositivo ? toDomain(prismaDispositivo) : null;
@@ -40,11 +40,9 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
 
   async findAllForPagination(params: PaginatedParams): Promise<{ data: Dispositivo[]; total: number }> {
     const { skip, take } = params;
-    const where = { deletedAt: null };
 
     const [data, total] = await this.prisma.$transaction([
       this.prisma.dispositivo.findMany({
-        where,
         skip,
         take,
         orderBy: [
@@ -54,7 +52,6 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
         select: SELECT_DISPOSITIVOS,
       }),
       this.prisma.dispositivo.count({
-        where,
       }),
     ]);
 
