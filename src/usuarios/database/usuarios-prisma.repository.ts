@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
@@ -9,6 +9,8 @@ import { SELECT_USUARIO_FOR_AUTH } from '../types/usuario-for-auth-select.type';
 import { SELECT_USUARIOS } from '../types/usuario-select.type';
 import { Usuario } from '../types/usuario.type';
 import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
+import { toDomain, toDomainForAuth, toDomainList, toPrismaUsuarioRol } from './usuario-prisma-mapper';
+import { SyncQueryParams } from '../types/sync-query-params.type';
 
 @Injectable()
 export class UsuariosPrismaRepository implements IUsuariosRepository {
@@ -16,9 +18,9 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
 
   async create(data: Omit<Usuario, 'id'>): Promise<Partial<Usuario>> {
     try {
-      return await this.prisma.usuario.create({
+      const prismaUsuario =  await this.prisma.usuario.create({
         data: {
-          rol: data.rol,
+          rol: toPrismaUsuarioRol(data.rol),
           nombre: data.nombre,
           correoElectronico: data.correoElectronico,
           contrasena: data.contrasena,
@@ -27,37 +29,41 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
         },
         select: SELECT_USUARIOS,
       });
+      return toDomain(prismaUsuario);
     } catch (error: unknown) {
       this.handlePrismaError(error);
     }
   }
 
   async findById(id: string): Promise<Partial<Usuario> | null> {
-    return this.prisma.usuario.findFirst({
+    const prismaUsuario = await this.prisma.usuario.findFirst({
       where: { id, deletedAt: null },
       select: SELECT_USUARIOS,
     });
+    return prismaUsuario ? toDomain(prismaUsuario) : null;
   }
 
   async findByCorreoElectronico(correoElectronico: string): Promise<Partial<Usuario> | null> {
-    return this.prisma.usuario.findFirst({
+    const prismaUsuario = await this.prisma.usuario.findFirst({
       where: { correoElectronico, deletedAt: null },
       select: SELECT_USUARIOS,
     });
+    return prismaUsuario ? toDomain(prismaUsuario) : null;
   }
 
   async findForAuthByCorreoElectronico(correoElectronico: string): Promise<UsuarioForAuth | null> {
-    return this.prisma.usuario.findFirst({
+    const prismaUsuarioForAuth = await this.prisma.usuario.findFirst({
       where: { correoElectronico, deletedAt: null },
       select: SELECT_USUARIO_FOR_AUTH,
     });
+    return prismaUsuarioForAuth ? toDomainForAuth(prismaUsuarioForAuth) : null;
   }
 
-  async findAllForSync(lastSync: Date): Promise<Partial<Usuario>[]> {
-    return this.prisma.usuario.findMany({
+  async findAllForSync(params: SyncQueryParams): Promise<Partial<Usuario>[]> {
+    const prismaUsuarios = await this.prisma.usuario.findMany({
       where: {
         updatedAt: {
-          gt: lastSync,
+          gt: params.lastSync,
         },
       },
       orderBy: [
@@ -66,6 +72,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
       ],
       select: SELECT_USUARIOS,
     });
+    return toDomainList(prismaUsuarios);
   }
 
   async findAllForPagination(params: PaginatedParams): Promise<{ data: Partial<Usuario>[]; total: number }> {
@@ -88,7 +95,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
       }),
     ]);
 
-    return { data, total };
+    return { data: toDomainList(data), total };
   }
 
   async update(params: UsuarioUpdateParams): Promise<void> {
@@ -110,7 +117,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
       });
 
       if (result.count === 0) {
-        throw new ConflictException('Usuario no encontrado.');
+        throw new NotFoundException('Usuario no encontrado.');
       }
     } catch (error: unknown) {
       this.handlePrismaError(error);
@@ -130,12 +137,12 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     });
 
     if (result.count === 0) {
-      throw new ConflictException('Usuario no encontrado.');
+      throw new NotFoundException('Usuario no encontrado.');
     }
   }
 
   private handlePrismaError(error: unknown): never {
-    if (error instanceof ConflictException) {
+    if (error instanceof ConflictException || error instanceof NotFoundException) {
       throw error;
     }
 
@@ -163,6 +170,13 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
           message: 'El correo electronico ya existe.',
         })
       }
+    }
+
+    /**
+     * @description Maneja errores de Prisma cuando un registro requerido no existe (P2025).
+     */
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      throw new NotFoundException('Usuario no encontrado.');
     }
 
     throw error;
