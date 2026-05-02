@@ -4,7 +4,7 @@ import { IsEmail, IsString, Length } from "class-validator";
 export class LoginDto {
     @IsString()
     @IsEmail()
-    @Transform(({ value }) => typeof value === "string" ? value.toLocaleLowerCase() : value)
+    @Transform(({ value }) => typeof value === "string" ? value.toLowerCase() : value)
     readonly correoElectronico!: string;
 
     @IsString()

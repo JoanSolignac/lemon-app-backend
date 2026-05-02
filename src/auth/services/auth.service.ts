@@ -10,7 +10,7 @@ import { AccessTokenDto } from '../dtos/responses/access-token.dto';
 
 @Injectable()
 export class AuthService {
-    private readonly INVALID_CREDENTIALS_MESSAGE = 'Invalid Credentials';
+    private readonly INVALID_CREDENTIALS_MESSAGE = 'Credenciales no válidas';
 
     constructor(
         private readonly usuariosService: UsuariosService,
