@@ -1,12 +1,12 @@
-import type { Usuario } from '../../types/usuario.type';
+import type { Rol, Usuario } from '../../types/usuario.type';
 
 export class UsuarioResponseDto {
-  readonly id!: Usuario['id'];
-  readonly rol!: Usuario['rol'];
-  readonly nombre!: Usuario['nombre'];
-  readonly correoElectronico!: Usuario['correoElectronico'];
-  readonly activo!: Usuario['activo'];
-  readonly createdAt!: Usuario['createdAt'];
-  readonly updatedAt!: Usuario['updatedAt'];
-  readonly deletedAt!: Usuario['deletedAt'];
+  readonly id!: string;
+  readonly rol!: Rol;
+  readonly nombre!: string;
+  readonly correoElectronico!: string;
+  readonly activo!: boolean;
+  readonly createdAt!: Date;
+  readonly updatedAt!: Date;
+  readonly deletedAt!: Date | null;
 }

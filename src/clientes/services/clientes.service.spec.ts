@@ -7,9 +7,7 @@ import { UpdateClienteDto } from '../dtos/requests/update-cliente';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { ConflictException } from '@nestjs/common';
-import { ClientesPrismaRepository } from '../database/clientes-prisma.repository';
 import { IClientesRepository } from '../repositories/clientes.repository';
-import { create } from 'domain';
 
 describe('ClientesService', () => {
   let clienteService: ClientesService;

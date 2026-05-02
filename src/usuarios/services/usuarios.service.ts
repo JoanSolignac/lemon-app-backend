@@ -1,15 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
+import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { PaginatedResult } from 'src/common/types/paginated-result.type';
 import { calculateSkipTakeForPagination, normalizePaginationDto } from 'src/common/utils/pagination.util';
+import { HashService } from 'src/hash/services/hash.service';
 import { IUSUARIO_REPOSITORY } from '../constants/usuarios.constant';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
-import { UsuarioResponseDto } from '../dtos/responses/usuario-response.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
+import { UsuarioResponseDto } from '../dtos/responses/usuario-response.dto';
 import type { IUsuariosRepository } from '../repositories/usuarios.repository';
 import { UsuarioForAuth } from '../types/usuario-for-auth.type';
 import { Usuario } from '../types/usuario.type';
-import { HashService } from 'src/hash/services/hash.service';
 
 @Injectable()
 export class UsuariosService {
@@ -35,29 +36,29 @@ export class UsuariosService {
 
     const createdUsuario = await this.usuarioRepository.create(usuario);
 
-    return createdUsuario as UsuarioResponseDto;
+    return this.toResponse(createdUsuario);
   }
 
   async findById(id: string): Promise<UsuarioResponseDto | null> {
     const usuario = await this.usuarioRepository.findById(id);
 
-    return usuario as UsuarioResponseDto | null;
+    return usuario ? this.toResponse(usuario) : null;
   }
 
   async findByCorreoElectronico(correoElectronico: string): Promise<UsuarioResponseDto | null> {
     const usuario = await this.usuarioRepository.findByCorreoElectronico(correoElectronico);
 
-    return usuario as UsuarioResponseDto | null;
+    return usuario ? this.toResponse(usuario) : null;
   }
 
   async findForAuthByCorreoElectronico(correoElectronico: string): Promise<UsuarioForAuth | null> {
     return this.usuarioRepository.findForAuthByCorreoElectronico(correoElectronico);
   }
 
-  async findAllForSync(lastSync: Date): Promise<UsuarioResponseDto[]> {
-    const usuarios = await this.usuarioRepository.findAllForSync(lastSync);
+  async findAllForSync(dto: SyncQueryDto): Promise<UsuarioResponseDto[]> {
+    const usuarios = await this.usuarioRepository.findAllForSync(dto);
 
-    return usuarios as UsuarioResponseDto[];
+    return usuarios.map((u) => this.toResponse(u));
   }
 
   async findAllPaginated(dto: PaginatedQueryDto): Promise<PaginatedResult<UsuarioResponseDto>> {
@@ -66,7 +67,7 @@ export class UsuariosService {
     const { data, total } = await this.usuarioRepository.findAllForPagination({ skip, take });
 
     return {
-      data: data as UsuarioResponseDto[],
+      data: data.map((u) => this.toResponse(u)),
       page,
       limit,
       total,
@@ -90,5 +91,18 @@ export class UsuariosService {
 
   async delete(id: string): Promise<void> {
     await this.usuarioRepository.softDelete(id);
+  }
+
+  private toResponse(usuario: Partial<Usuario>): UsuarioResponseDto {
+    return {
+      id: usuario.id!,
+      rol: usuario.rol!,
+      nombre: usuario.nombre!,
+      correoElectronico: usuario.correoElectronico!,
+      activo: usuario.activo!,
+      createdAt: usuario.createdAt!,
+      updatedAt: usuario.updatedAt!,
+      deletedAt: usuario.deletedAt ?? null,
+    };
   }
 }

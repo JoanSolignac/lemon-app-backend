@@ -1,11 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { PaginatedResult } from 'src/common/types/paginated-result.type';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UsuarioResponseDto } from '../dtos/responses/usuario-response.dto';
-import { SyncQueryDto } from '../dtos/requests/sync-query.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import { UsuariosService } from '../services/usuarios.service';
+import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -23,7 +23,7 @@ export class UsuariosController {
 
   @Get('sync')
   async findAllForSync(@Query() dto: SyncQueryDto): Promise<UsuarioResponseDto[]> {
-    return this.usuariosService.findAllForSync(dto.lastSync!);
+    return this.usuariosService.findAllForSync(dto);
   }
 
   @Get()
@@ -32,19 +32,19 @@ export class UsuariosController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<UsuarioResponseDto | null> {
+  async findById(@Param('id', ParseUUIDPipe) id: string): Promise<UsuarioResponseDto | null> {
     return this.usuariosService.findById(id);
   }
 
   @Patch(':id')
   @HttpCode(204)
-  async update(@Param('id') id: string, @Body() dto: UpdateUsuarioDto): Promise<void> {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUsuarioDto): Promise<void> {
     await this.usuariosService.update(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  async delete(@Param('id') id: string): Promise<void> {
+  async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.usuariosService.delete(id);
   }
 }

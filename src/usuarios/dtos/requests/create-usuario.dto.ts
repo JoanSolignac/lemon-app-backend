@@ -1,10 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsEmail, IsEnum, IsString, Length } from 'class-validator';
-
-enum Rol {
-  ADMINISTRADOR = 'ADMINISTRADOR',
-  SUPERVISOR = 'SUPERVISOR',
-}
+import { Rol } from 'src/usuarios/types/usuario.type';
 
 export class CreateUsuarioDto {
   @IsEnum(Rol)

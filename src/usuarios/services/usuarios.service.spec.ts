@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
+import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { IUSUARIO_REPOSITORY } from '../constants/usuarios.constant';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
@@ -193,12 +194,12 @@ describe('UsuariosService', () => {
 
   describe('findAllForSync', () => {
     it('debe delegar la búsqueda de cambios desde la última sincronización', async () => {
-      const lastSync = new Date();
+      const dto: SyncQueryDto = { lastSync: new Date() };
       usuarioRepository.findAllForSync.mockResolvedValue([usuarioResponseMock]);
 
-      const result = await usuariosService.findAllForSync(lastSync);
+      const result = await usuariosService.findAllForSync(dto);
 
-      expect(usuarioRepository.findAllForSync).toHaveBeenCalledWith(lastSync);
+      expect(usuarioRepository.findAllForSync).toHaveBeenCalledWith(dto);
       expect(usuarioRepository.findAllForSync).toHaveBeenCalledTimes(1);
       expect(result).toEqual([usuarioResponseMock]);
     });
@@ -280,9 +281,11 @@ describe('UsuariosService', () => {
       expect(usuarioRepository.update).toHaveBeenCalledWith({
         id: ID_USUARIO,
         data: {
+          rol: dto.rol,
           nombre: dto.nombre,
           correoElectronico: dto.correoElectronico,
-          contrasena: undefined, // importante
+          contrasena: undefined,
+          activo: dto.activo,
         },
       });
     });

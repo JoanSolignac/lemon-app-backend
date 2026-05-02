@@ -3,7 +3,7 @@ import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto'
 import { PaginatedResult } from 'src/common/types/paginated-result.type';
 import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
-import { SyncQueryDto } from '../dtos/requests/sync-query.dto';
+import { SyncQueryDto } from '../../common/dtos/requests/sync-query.dto';
 import { UpdateClienteDto } from '../dtos/requests/update-cliente';
 import { ClientesService } from '../services/clientes.service';
 import { Cliente } from '../types/cliente.type';
@@ -24,7 +24,7 @@ export class ClientesController {
 
   @Get('sync')
   async findAllForSync(@Query() dto: SyncQueryDto): Promise<Cliente[]> {
-    return this.clientesService.findAllForSync(dto.lastSync!);
+    return this.clientesService.findAllForSync(dto.lastSync);
   }
 
   @Get()

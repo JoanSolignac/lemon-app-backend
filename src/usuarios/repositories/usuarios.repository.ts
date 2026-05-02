@@ -2,6 +2,7 @@ import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { UsuarioForAuth } from '../types/usuario-for-auth.type';
 import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 import { Usuario } from '../types/usuario.type';
+import { SyncQueryParams } from '../types/sync-query-params.type';
 
 export interface IUsuariosRepository {
   create(data: Omit<Usuario, 'id'>): Promise<Partial<Usuario>>
@@ -12,7 +13,7 @@ export interface IUsuariosRepository {
 
   findForAuthByCorreoElectronico(correoElectronico: string): Promise<UsuarioForAuth | null>
 
-  findAllForSync(lastSync: Date): Promise<Partial<Usuario>[]>
+  findAllForSync(params: SyncQueryParams): Promise<Partial<Usuario>[]>
 
   findAllForPagination(params: PaginatedParams): Promise<{ data: Partial<Usuario>[]; total: number }>
 

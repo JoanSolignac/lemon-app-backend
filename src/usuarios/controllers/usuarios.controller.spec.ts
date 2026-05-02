@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { BadRequestException, ParseUUIDPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
+import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
-import { SyncQueryDto } from '../dtos/requests/sync-query.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import { UsuariosService } from '../services/usuarios.service';
 import { UsuariosController } from './usuarios.controller';
@@ -25,8 +26,10 @@ describe('UsuariosController', () => {
     SUPERVISOR = 'SUPERVISOR',
   }
 
+  const ID_USUARIO = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
+
   const usuarioMock = {
-    id: 'usr-001',
+    id: ID_USUARIO,
     rol: Rol.ADMINISTRADOR,
     nombre: 'JUAN PEREZ',
     correoElectronico: 'admin@lemon.pe',
@@ -79,9 +82,9 @@ describe('UsuariosController', () => {
     it('debe retornar un usuario por id', async () => {
       usuariosService.findById.mockResolvedValue(usuarioMock);
 
-      const result = await controller.findById('usr-001');
+      const result = await controller.findById(ID_USUARIO);
 
-      expect(usuariosService.findById).toHaveBeenCalledWith('usr-001');
+      expect(usuariosService.findById).toHaveBeenCalledWith(ID_USUARIO);
       expect(result).toEqual(usuarioMock);
     });
   });
@@ -104,7 +107,7 @@ describe('UsuariosController', () => {
 
       const result = await controller.findAllForSync(dto);
 
-      expect(usuariosService.findAllForSync).toHaveBeenCalledWith(dto.lastSync!);
+      expect(usuariosService.findAllForSync).toHaveBeenCalledWith(dto);
       expect(result).toEqual([usuarioMock]);
     });
   });
@@ -135,9 +138,9 @@ describe('UsuariosController', () => {
       };
       usuariosService.update.mockResolvedValue();
 
-      const result = await controller.update('usr-001', dto);
+      const result = await controller.update(ID_USUARIO, dto);
 
-      expect(usuariosService.update).toHaveBeenCalledWith('usr-001', dto);
+      expect(usuariosService.update).toHaveBeenCalledWith(ID_USUARIO, dto);
       expect(result).toBeUndefined();
     });
   });
@@ -146,10 +149,38 @@ describe('UsuariosController', () => {
     it('debe eliminar un usuario', async () => {
       usuariosService.delete.mockResolvedValue();
 
-      const result = await controller.delete('usr-001');
+      const result = await controller.delete(ID_USUARIO);
 
-      expect(usuariosService.delete).toHaveBeenCalledWith('usr-001');
+      expect(usuariosService.delete).toHaveBeenCalledWith(ID_USUARIO);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('ParseUUIDPipe', () => {
+    const pipe = new ParseUUIDPipe();
+
+    it('debe aceptar un UUID válido', async () => {
+      const validUuid = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
+
+      const result = await pipe.transform(validUuid, { type: 'param', metatype: String });
+
+      expect(result).toBe(validUuid);
+    });
+
+    it('debe lanzar BadRequestException para un ID inválido', async () => {
+      const invalidId = 'usr-001';
+
+      await expect(pipe.transform(invalidId, { type: 'param', metatype: String })).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('debe lanzar BadRequestException para un UUID con formato incorrecto', async () => {
+      const malformedUuid = 'not-a-uuid';
+
+      await expect(pipe.transform(malformedUuid, { type: 'param', metatype: String })).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });
