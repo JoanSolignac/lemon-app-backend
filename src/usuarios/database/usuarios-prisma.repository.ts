@@ -10,6 +10,7 @@ import { SELECT_USUARIOS } from '../types/usuario-select.type';
 import { CreateUsuario } from '../types/create-usuario.type';
 import { Usuario } from '../types/usuario.type';
 import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
+import { UsuarioUpdateRolParams } from '../types/usuario-update-rol-params.type';
 import { toDomain, toDomainForAuth, toDomainList, toPrismaUsuarioRol } from './usuario-prisma-mapper';
 import { SyncQueryParams } from '../types/sync-query-params.type';
 
@@ -109,11 +110,37 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
           deletedAt: null,
         },
         data: {
-          rol: data.rol,
           nombre: data.nombre,
           correoElectronico: data.correoElectronico,
           contrasena: data.contrasena,
-          activo: data.activo,
+        },
+      });
+
+      if (result.count === 0) {
+        throw new NotFoundException('Usuario no encontrado.');
+      }
+    } catch (error: unknown) {
+      this.logger.error(
+        'Prisma operation failed',
+        JSON.stringify(error, null, 2),
+      );
+      this.handlePrismaError(error);
+    }
+  }
+
+  async updateRol(params: UsuarioUpdateRolParams): Promise<void> {
+    this.logger.debug('update usuario rol');
+
+    const { id, rol } = params;
+
+    try {
+      const result = await this.prisma.usuario.updateMany({
+        where: {
+          id,
+          deletedAt: null,
+        },
+        data: {
+          rol: toPrismaUsuarioRol(rol),
         },
       });
 

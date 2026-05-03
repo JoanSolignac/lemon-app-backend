@@ -6,6 +6,7 @@ import { HashService } from 'src/hash/services/hash.service';
 import { IUSUARIO_REPOSITORY } from '../constants/usuarios.constant';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
+import { UpdateUsuarioRolDto } from '../dtos/requests/update-usuario-rol.dto';
 import { UsuarioResponseDto } from '../dtos/responses/usuario-response.dto';
 import type { IUsuariosRepository } from '../repositories/usuarios.repository';
 import { UsuarioForAuth } from '../types/usuario-for-auth.type';
@@ -71,13 +72,15 @@ export class UsuariosService {
     await this.usuarioRepository.update({
       id,
       data: {
-        rol: dto.rol,
         nombre: dto.nombre,
         correoElectronico: dto.correoElectronico,
         contrasena: hashedPassword,
-        activo: dto.activo,
       },
     });
+  }
+
+  async updateRol(id: string, dto: UpdateUsuarioRolDto): Promise<void> {
+    await this.usuarioRepository.updateRol({ id, rol: dto.rol });
   }
 
   async delete(id: string): Promise<void> {

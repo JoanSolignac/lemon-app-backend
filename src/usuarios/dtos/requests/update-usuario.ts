@@ -1,12 +1,7 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, Length } from 'class-validator';
-import { Rol } from 'src/common/types/user-role.enum';
+import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 
 export class UpdateUsuarioDto {
-  @IsOptional()
-  @IsEnum(Rol)
-  declare readonly rol?: Rol;
-
   @IsOptional()
   @IsString()
   @Length(3, 120)
@@ -23,8 +18,4 @@ export class UpdateUsuarioDto {
   @IsString()
   @Length(6, 255)
   declare readonly contrasena?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  declare readonly activo?: boolean;
 }

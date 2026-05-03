@@ -4,6 +4,7 @@ import { PaginatedResultDto } from 'src/common/dtos/responses/paginated-result.d
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UsuarioResponseDto } from '../dtos/responses/usuario-response.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
+import { UpdateUsuarioRolDto } from '../dtos/requests/update-usuario-rol.dto';
 import { UsuariosService } from '../services/usuarios.service';
 import { UseAuth } from 'src/common/decorators/use-auth.decorator';
 import { Rol } from 'src/common/types/user-role.enum';
@@ -40,6 +41,13 @@ export class UsuariosController {
   @HttpCode(204)
   async update(@CurrentUser() user: UserPayload, @Body() dto: UpdateUsuarioDto): Promise<void> {
     await this.usuariosService.update(user.sub, dto);
+  }
+
+  @UseAuth(Rol.ADMINISTRADOR)
+  @Patch(':id/rol')
+  @HttpCode(204)
+  async updateRol(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUsuarioRolDto): Promise<void> {
+    await this.usuariosService.updateRol(id, dto);
   }
 
   @Delete(':id')
