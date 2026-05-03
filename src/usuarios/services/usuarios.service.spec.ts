@@ -23,6 +23,7 @@ describe('UsuariosService', () => {
     findForAuthByCorreoElectronico: jest.fn(),
     findAllForPagination: jest.fn(),
     update: jest.fn(),
+    updateRol: jest.fn(),
     softDelete: jest.fn(),
   };
 
@@ -226,11 +227,9 @@ describe('UsuariosService', () => {
 
   describe('update', () => {
     const updateDto: UpdateUsuarioDto = {
-      rol: Rol.SUPERVISOR,
       nombre: NOMBRE,
       correoElectronico: CORREO_ELECTRONICO,
       contrasena: '654321',
-      activo: true,
     };
 
     it('debe actualizar un usuario', async () => {
@@ -275,6 +274,30 @@ describe('UsuariosService', () => {
 
       await expect(usuariosService.update(ID_USUARIO, updateDto)).rejects.toThrow(ConflictException);
       expect(usuarioRepository.update).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('updateRol', () => {
+    it('debe actualizar el rol de un usuario', async () => {
+      const dto = { rol: Rol.SUPERVISOR };
+      usuarioRepository.updateRol.mockResolvedValue();
+
+      const result = await usuariosService.updateRol(ID_USUARIO, dto);
+
+      expect(usuarioRepository.updateRol).toHaveBeenCalledWith({
+        id: ID_USUARIO,
+        rol: dto.rol,
+      });
+      expect(result).toBeUndefined();
+    });
+
+    it('debe propagar error si el usuario no existe al actualizar rol', async () => {
+      const dto = { rol: Rol.SUPERVISOR };
+      const error = new Error('Usuario no encontrado');
+      usuarioRepository.updateRol.mockRejectedValue(error);
+
+      await expect(usuariosService.updateRol(ID_USUARIO, dto)).rejects.toThrow('Usuario no encontrado');
+      expect(usuarioRepository.updateRol).toHaveBeenCalledTimes(1);
     });
   });
 

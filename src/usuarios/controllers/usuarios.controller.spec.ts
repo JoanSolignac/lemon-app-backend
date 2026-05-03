@@ -20,6 +20,7 @@ describe('UsuariosController', () => {
     findAllForSync: jest.fn(),
     findAllPaginated: jest.fn(),
     update: jest.fn(),
+    updateRol: jest.fn(),
     delete: jest.fn(),
   } as unknown as jest.Mocked<UsuariosService>;
 
@@ -126,7 +127,6 @@ describe('UsuariosController', () => {
     it('debe actualizar un usuario', async () => {
       const dto: UpdateUsuarioDto = {
         nombre: 'JUAN PEREZ',
-        activo: true,
       };
       const user: UserPayload = {
         sub: ID_USUARIO,
@@ -138,6 +138,18 @@ describe('UsuariosController', () => {
       const result = await controller.update(user, dto);
 
       expect(usuariosService.update).toHaveBeenCalledWith(ID_USUARIO, dto);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('updateRol', () => {
+    it('debe actualizar el rol de un usuario', async () => {
+      const dto = { rol: Rol.SUPERVISOR };
+      usuariosService.updateRol.mockResolvedValue();
+
+      const result = await controller.updateRol(ID_USUARIO, dto);
+
+      expect(usuariosService.updateRol).toHaveBeenCalledWith(ID_USUARIO, dto);
       expect(result).toBeUndefined();
     });
   });
