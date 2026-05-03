@@ -35,6 +35,7 @@ export class UsuariosController {
     return this.usuariosService.findById(id);
   }
 
+  @UseAuth(Rol.ADMINISTRADOR, Rol.SUPERVISOR)
   @Patch()
   @HttpCode(204)
   async update(@CurrentUser() user: UserPayload, @Body() dto: UpdateUsuarioDto): Promise<void> {
