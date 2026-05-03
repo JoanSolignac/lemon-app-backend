@@ -1,13 +1,12 @@
 import { Rol } from 'src/common/types/user-role.enum';
-import type { Usuario } from '../../types/usuario.type';
 
-export class UsuarioResponseDto {
-  readonly id!: string;
-  readonly rol!: Rol;
-  readonly nombre!: string;
-  readonly correoElectronico!: string;
-  readonly activo!: boolean;
-  readonly createdAt!: Date;
-  readonly updatedAt!: Date;
-  readonly deletedAt!: Date | null;
-}
+export type UsuarioResponseDto = {
+  id: string;
+  rol: Rol;
+  nombre: string;
+  correoElectronico: string;
+  activo: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+};

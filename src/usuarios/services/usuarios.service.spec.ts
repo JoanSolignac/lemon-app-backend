@@ -21,7 +21,6 @@ describe('UsuariosService', () => {
     findById: jest.fn(),
     findByCorreoElectronico: jest.fn(),
     findForAuthByCorreoElectronico: jest.fn(),
-    findAllForSync: jest.fn(),
     findAllForPagination: jest.fn(),
     update: jest.fn(),
     softDelete: jest.fn(),
@@ -43,31 +42,16 @@ describe('UsuariosService', () => {
     contrasena: '123456',
   };
 
-  const usuarioResponseMock = {
+  const usuarioMock = {
     id: ID_USUARIO,
     rol: Rol.ADMINISTRADOR,
     nombre: NOMBRE,
     correoElectronico: CORREO_ELECTRONICO,
+    contrasena: 'hashed-123456',
     activo: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
-  };
-
-  const usuarioMock = {
-    ...createDto,
-    activo: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: null,
-  };
-
-  const usuarioForAuthMock = {
-    id: ID_USUARIO,
-    rol: Rol.ADMINISTRADOR,
-    correoElectronico: CORREO_ELECTRONICO,
-    contrasena: '123456',
-    activo: true,
   };
 
   beforeEach(async () => {
@@ -96,25 +80,28 @@ describe('UsuariosService', () => {
     it('debe crear un nuevo usuario', async () => {
       const hashedPassword = 'hashed-123456';
       hashService.hash.mockResolvedValue(hashedPassword);
-      usuarioRepository.create.mockResolvedValue(usuarioResponseMock);
+      usuarioRepository.create.mockResolvedValue(usuarioMock);
 
       const result = await usuariosService.create(createDto);
 
       expect(hashService.hash).toHaveBeenCalledWith(createDto.contrasena);
       expect(usuarioRepository.create).toHaveBeenCalledTimes(1);
-      expect(usuarioRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          rol: createDto.rol,
-          nombre: createDto.nombre,
-          correoElectronico: createDto.correoElectronico,
-          contrasena: hashedPassword,
-          activo: true,
-          deletedAt: null,
-          createdAt: expect.any(Date),
-          updatedAt: expect.any(Date),
-        }),
-      );
-      expect(result).toEqual(usuarioResponseMock);
+      expect(usuarioRepository.create).toHaveBeenCalledWith({
+        rol: createDto.rol,
+        nombre: createDto.nombre,
+        correoElectronico: createDto.correoElectronico,
+        contrasena: hashedPassword,
+      });
+      expect(result).toEqual({
+        id: usuarioMock.id,
+        rol: usuarioMock.rol,
+        nombre: usuarioMock.nombre,
+        correoElectronico: usuarioMock.correoElectronico,
+        activo: usuarioMock.activo,
+        createdAt: usuarioMock.createdAt,
+        updatedAt: usuarioMock.updatedAt,
+        deletedAt: usuarioMock.deletedAt,
+      });
     });
 
     it('debe propagar conflicto por claves unicas al crear un usuario', async () => {
@@ -128,13 +115,22 @@ describe('UsuariosService', () => {
 
   describe('findById', () => {
     it('debe retornar un usuario si existe', async () => {
-      usuarioRepository.findById.mockResolvedValue(usuarioResponseMock);
+      usuarioRepository.findById.mockResolvedValue(usuarioMock);
 
       const result = await usuariosService.findById(ID_USUARIO);
 
       expect(usuarioRepository.findById).toHaveBeenCalledWith(ID_USUARIO);
       expect(usuarioRepository.findById).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(usuarioResponseMock);
+      expect(result).toEqual({
+        id: usuarioMock.id,
+        rol: usuarioMock.rol,
+        nombre: usuarioMock.nombre,
+        correoElectronico: usuarioMock.correoElectronico,
+        activo: usuarioMock.activo,
+        createdAt: usuarioMock.createdAt,
+        updatedAt: usuarioMock.updatedAt,
+        deletedAt: usuarioMock.deletedAt,
+      });
     });
 
     it('debe retornar null si el usuario no existe', async () => {
@@ -150,13 +146,22 @@ describe('UsuariosService', () => {
 
   describe('findByCorreoElectronico', () => {
     it('debe retornar un usuario por correo electronico', async () => {
-      usuarioRepository.findByCorreoElectronico.mockResolvedValue(usuarioResponseMock);
+      usuarioRepository.findByCorreoElectronico.mockResolvedValue(usuarioMock);
 
       const result = await usuariosService.findByCorreoElectronico(CORREO_ELECTRONICO);
 
       expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledWith(CORREO_ELECTRONICO);
       expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(usuarioResponseMock);
+      expect(result).toEqual({
+        id: usuarioMock.id,
+        rol: usuarioMock.rol,
+        nombre: usuarioMock.nombre,
+        correoElectronico: usuarioMock.correoElectronico,
+        activo: usuarioMock.activo,
+        createdAt: usuarioMock.createdAt,
+        updatedAt: usuarioMock.updatedAt,
+        deletedAt: usuarioMock.deletedAt,
+      });
     });
 
     it('debe retornar null si no existe usuario con el correo electronico', async () => {
@@ -170,55 +175,33 @@ describe('UsuariosService', () => {
     });
   });
 
-  describe('findForAuthByCorreoElectronico', () => {
-    it('debe retornar un usuario con credenciales para autenticación', async () => {
-      usuarioRepository.findForAuthByCorreoElectronico.mockResolvedValue(usuarioForAuthMock);
-
-      const result = await usuariosService.findForAuthByCorreoElectronico(CORREO_ELECTRONICO);
-
-      expect(usuarioRepository.findForAuthByCorreoElectronico).toHaveBeenCalledWith(CORREO_ELECTRONICO);
-      expect(usuarioRepository.findForAuthByCorreoElectronico).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(usuarioForAuthMock);
-    });
-
-    it('debe retornar null si no existe usuario para autenticación', async () => {
-      usuarioRepository.findForAuthByCorreoElectronico.mockResolvedValue(null);
-
-      const result = await usuariosService.findForAuthByCorreoElectronico(CORREO_ELECTRONICO);
-
-      expect(usuarioRepository.findForAuthByCorreoElectronico).toHaveBeenCalledWith(CORREO_ELECTRONICO);
-      expect(usuarioRepository.findForAuthByCorreoElectronico).toHaveBeenCalledTimes(1);
-      expect(result).toBeNull();
-    });
-  });
-
-  describe('findAllForSync', () => {
-    it('debe delegar la búsqueda de cambios desde la última sincronización', async () => {
-      const dto: SyncQueryDto = { lastSync: new Date() };
-      usuarioRepository.findAllForSync.mockResolvedValue([usuarioResponseMock]);
-
-      const result = await usuariosService.findAllForSync(dto);
-
-      expect(usuarioRepository.findAllForSync).toHaveBeenCalledWith(dto);
-      expect(usuarioRepository.findAllForSync).toHaveBeenCalledTimes(1);
-      expect(result).toEqual([usuarioResponseMock]);
-    });
-  });
-
   describe('findAllPaginated', () => {
     it('debe retornar usuarios paginados', async () => {
       const dto: PaginatedQueryDto = { page: 2, limit: 10 };
-      usuarioRepository.findAllForPagination.mockResolvedValue({ data: [usuarioResponseMock], total: 25 });
+      usuarioRepository.findAllForPagination.mockResolvedValue({ data: [usuarioMock], total: 25 });
 
       const result = await usuariosService.findAllPaginated(dto);
 
       expect(usuarioRepository.findAllForPagination).toHaveBeenCalledWith({ skip: 10, take: 10 });
       expect(usuarioRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        data: [usuarioResponseMock],
-        page: 2,
-        limit: 10,
-        total: 25,
+        data: [
+          {
+            id: usuarioMock.id,
+            rol: usuarioMock.rol,
+            nombre: usuarioMock.nombre,
+            correoElectronico: usuarioMock.correoElectronico,
+            activo: usuarioMock.activo,
+            createdAt: usuarioMock.createdAt,
+            updatedAt: usuarioMock.updatedAt,
+            deletedAt: usuarioMock.deletedAt,
+          },
+        ],
+        meta: {
+          page: 2,
+          limit: 10,
+          total: 25,
+        },
       });
     });
 
@@ -232,9 +215,11 @@ describe('UsuariosService', () => {
       expect(usuarioRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         data: [],
-        page: 1,
-        limit: 100,
-        total: 0,
+        meta: {
+          page: 1,
+          limit: 100,
+          total: 0,
+        },
       });
     });
   });
@@ -280,13 +265,7 @@ describe('UsuariosService', () => {
 
       expect(usuarioRepository.update).toHaveBeenCalledWith({
         id: ID_USUARIO,
-        data: {
-          rol: dto.rol,
-          nombre: dto.nombre,
-          correoElectronico: dto.correoElectronico,
-          contrasena: undefined,
-          activo: dto.activo,
-        },
+        data: dto,
       });
     });
 

@@ -1,6 +1,6 @@
-import { Usuario } from './usuario.type';
+import { UpdateUsuario } from './update-usuario.type';
 
 export type UsuarioUpdateParams = {
   id: string;
-  data: Partial<Omit<Usuario, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>;
+  data: UpdateUsuario;
 };
