@@ -1,12 +1,16 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
-import { PaginatedResult } from 'src/common/types/paginated-result.type';
+import { PaginatedResultDto } from 'src/common/dtos/responses/paginated-result.dto';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UsuarioResponseDto } from '../dtos/responses/usuario-response.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import { UsuariosService } from '../services/usuarios.service';
-import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
+import { UseAuth } from 'src/common/decorators/use-auth.decorator';
+import { Rol } from 'src/common/types/user-role.enum';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import type { UserPayload } from 'src/common/interfaces/jwt-payload.interface';
 
+@UseAuth(Rol.ADMINISTRADOR)
 @Controller('usuarios')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
@@ -21,13 +25,8 @@ export class UsuariosController {
     return this.usuariosService.findByCorreoElectronico(correoElectronico);
   }
 
-  @Get('sync')
-  async findAllForSync(@Query() dto: SyncQueryDto): Promise<UsuarioResponseDto[]> {
-    return this.usuariosService.findAllForSync(dto);
-  }
-
   @Get()
-  async findAllPaginated(@Query() dto: PaginatedQueryDto): Promise<PaginatedResult<UsuarioResponseDto>> {
+  async findAllPaginated(@Query() dto: PaginatedQueryDto): Promise<PaginatedResultDto<UsuarioResponseDto>> {
     return this.usuariosService.findAllPaginated(dto);
   }
 
@@ -36,10 +35,10 @@ export class UsuariosController {
     return this.usuariosService.findById(id);
   }
 
-  @Patch(':id')
+  @Patch()
   @HttpCode(204)
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUsuarioDto): Promise<void> {
-    await this.usuariosService.update(id, dto);
+  async update(@CurrentUser() user: UserPayload, @Body() dto: UpdateUsuarioDto): Promise<void> {
+    await this.usuariosService.update(user.sub, dto);
   }
 
   @Delete(':id')

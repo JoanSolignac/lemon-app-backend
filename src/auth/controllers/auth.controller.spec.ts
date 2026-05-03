@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LoginDto } from '../dtos/requests/login.dto';
 import { AuthService } from '../services/auth.service';
 import { AuthController } from './auth.controller';
+import { Rol } from 'src/common/types/user-role.enum';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -58,7 +59,7 @@ describe('AuthController', () => {
       const userPayload: Parameters<AuthController['refresh']>[0] = {
         sub: 'usr-001',
         email: 'admin@lemon.pe',
-        rol: 'ADMINISTRADOR',
+        rol: Rol.ADMINISTRADOR,
       };
       const tokens = {
         accessToken: 'new-access-token',

@@ -4,7 +4,7 @@ import { LoginDto } from '../dtos/requests/login.dto';
 import { AccessTokenDto } from '../dtos/responses/access-token.dto';
 import type { UserPayload } from '../../common/interfaces/jwt-payload.interface';
 import { AuthService } from '../services/auth.service';
-import { GetMe } from '../../common/decorators/get-me.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 
 @Controller('auth')
@@ -20,7 +20,7 @@ export class AuthController {
   @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   @HttpCode(200)
-  async refresh(@GetMe() userPayload: UserPayload): Promise<AccessTokenDto> {
+  async refresh(@CurrentUser() userPayload: UserPayload): Promise<AccessTokenDto> {
     return this.authService.refresh(userPayload);
   }
 }

@@ -18,13 +18,13 @@ export const toDomainRol = (value: PrismaUsuarioRol) => {
     return value as Rol;
 }
 
-export const toDomain = (value: PrismaSelectUsuario): Partial<Usuario> => ({
+export const toDomain = (value: PrismaSelectUsuario): Usuario => ({
     ...value,
     rol: toDomainRol(value.rol),
-} as Partial<Usuario> );
+} as Usuario );
 
-export const toDomainList = (values: PrismaSelectUsuario[]): Partial<Usuario>[] => {
-    return values.map(value => toDomain(value));   
+export const toDomainList = (values: PrismaSelectUsuario[]): Usuario[] => {
+    return values.map(value => toDomain(value));
 }
 
 export const toDomainForAuth = (value: PrismaSelectUsuarioForAuth): UsuarioForAuth => ({

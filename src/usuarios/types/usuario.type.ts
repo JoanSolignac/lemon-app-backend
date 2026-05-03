@@ -9,5 +9,5 @@ export type Usuario = {
   activo: boolean
   createdAt: Date
   updatedAt: Date
-  deletedAt?: Date | null
+  deletedAt: Date | null
 }

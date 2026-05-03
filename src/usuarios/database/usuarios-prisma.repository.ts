@@ -7,6 +7,7 @@ import { IUsuariosRepository } from '../repositories/usuarios.repository';
 import { UsuarioForAuth } from '../types/usuario-for-auth.type';
 import { SELECT_USUARIO_FOR_AUTH } from '../types/usuario-for-auth-select.type';
 import { SELECT_USUARIOS } from '../types/usuario-select.type';
+import { CreateUsuario } from '../types/create-usuario.type';
 import { Usuario } from '../types/usuario.type';
 import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 import { toDomain, toDomainForAuth, toDomainList, toPrismaUsuarioRol } from './usuario-prisma-mapper';
@@ -16,16 +17,14 @@ import { SyncQueryParams } from '../types/sync-query-params.type';
 export class UsuariosPrismaRepository implements IUsuariosRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Omit<Usuario, 'id'>): Promise<Partial<Usuario>> {
+  async create(data: CreateUsuario): Promise<Usuario> {
     try {
-      const prismaUsuario =  await this.prisma.usuario.create({
+      const prismaUsuario = await this.prisma.usuario.create({
         data: {
           rol: toPrismaUsuarioRol(data.rol),
           nombre: data.nombre,
           correoElectronico: data.correoElectronico,
           contrasena: data.contrasena,
-          activo: data.activo,
-          deletedAt: data.deletedAt ?? null,
         },
         select: SELECT_USUARIOS,
       });
@@ -35,7 +34,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     }
   }
 
-  async findById(id: string): Promise<Partial<Usuario> | null> {
+  async findById(id: string): Promise<Usuario | null> {
     const prismaUsuario = await this.prisma.usuario.findFirst({
       where: { id, deletedAt: null },
       select: SELECT_USUARIOS,
@@ -43,7 +42,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     return prismaUsuario ? toDomain(prismaUsuario) : null;
   }
 
-  async findByCorreoElectronico(correoElectronico: string): Promise<Partial<Usuario> | null> {
+  async findByCorreoElectronico(correoElectronico: string): Promise<Usuario | null> {
     const prismaUsuario = await this.prisma.usuario.findFirst({
       where: { correoElectronico, deletedAt: null },
       select: SELECT_USUARIOS,
@@ -59,23 +58,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     return prismaUsuarioForAuth ? toDomainForAuth(prismaUsuarioForAuth) : null;
   }
 
-  async findAllForSync(params: SyncQueryParams): Promise<Partial<Usuario>[]> {
-    const prismaUsuarios = await this.prisma.usuario.findMany({
-      where: {
-        updatedAt: {
-          gt: params.lastSync,
-        },
-      },
-      orderBy: [
-        { updatedAt: 'asc' },
-        { id: 'asc' },
-      ],
-      select: SELECT_USUARIOS,
-    });
-    return toDomainList(prismaUsuarios);
-  }
-
-  async findAllForPagination(params: PaginatedParams): Promise<{ data: Partial<Usuario>[]; total: number }> {
+  async findAllForPagination(params: PaginatedParams): Promise<{ data: Usuario[]; total: number }> {
     const { skip, take } = params;
     const where = { deletedAt: null };
 

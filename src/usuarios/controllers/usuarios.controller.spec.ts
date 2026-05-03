@@ -5,6 +5,8 @@ import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto'
 import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
+import { UserPayload } from 'src/common/interfaces/jwt-payload.interface';
+import { Rol } from 'src/common/types/user-role.enum';
 import { UsuariosService } from '../services/usuarios.service';
 import { UsuariosController } from './usuarios.controller';
 
@@ -100,26 +102,16 @@ describe('UsuariosController', () => {
     });
   });
 
-  describe('findAllForSync', () => {
-    it('debe retornar usuarios para sincronización', async () => {
-      const dto: SyncQueryDto = { lastSync: new Date() };
-      usuariosService.findAllForSync.mockResolvedValue([usuarioMock]);
-
-      const result = await controller.findAllForSync(dto);
-
-      expect(usuariosService.findAllForSync).toHaveBeenCalledWith(dto);
-      expect(result).toEqual([usuarioMock]);
-    });
-  });
-
   describe('findAllPaginated', () => {
     it('debe retornar usuarios paginados', async () => {
       const dto: PaginatedQueryDto = { page: 1, limit: 10 };
       const paginatedResult = {
         data: [usuarioMock],
-        page: 1,
-        limit: 10,
-        total: 1,
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 1,
+        },
       };
       usuariosService.findAllPaginated.mockResolvedValue(paginatedResult);
 
@@ -136,9 +128,14 @@ describe('UsuariosController', () => {
         nombre: 'JUAN PEREZ',
         activo: true,
       };
+      const user: UserPayload = {
+        sub: ID_USUARIO,
+        email: 'admin@lemon.pe',
+        rol: Rol.ADMINISTRADOR,
+      };
       usuariosService.update.mockResolvedValue();
 
-      const result = await controller.update(ID_USUARIO, dto);
+      const result = await controller.update(user, dto);
 
       expect(usuariosService.update).toHaveBeenCalledWith(ID_USUARIO, dto);
       expect(result).toBeUndefined();
