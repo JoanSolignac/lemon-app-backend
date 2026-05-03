@@ -8,7 +8,9 @@ import { AllExceptionFilter } from './common/filters/exception/all-exception.fil
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalFilters(new AllExceptionFilter())
+  app.setGlobalPrefix('api/v1');
+
+  app.useGlobalFilters(new AllExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -19,7 +21,7 @@ async function bootstrap() {
         enableImplicitConversion: true
       }
     })
-  )
+  );
 
   const configService = app.get(ConfigService);
 
