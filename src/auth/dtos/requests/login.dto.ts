@@ -5,9 +5,9 @@ export class LoginDto {
     @IsString()
     @IsEmail()
     @Transform(({ value }) => typeof value === "string" ? value.toLowerCase() : value)
-    readonly correoElectronico!: string;
+    declare readonly correoElectronico: string;
 
     @IsString()
     @Length(2, 255)
-    readonly contrasena!: string;
+    declare readonly contrasena: string;
 }
