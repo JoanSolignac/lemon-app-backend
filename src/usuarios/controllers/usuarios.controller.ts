@@ -9,7 +9,7 @@ import { UsuariosService } from '../services/usuarios.service';
 import { UseAuth } from 'src/common/decorators/use-auth.decorator';
 import { Rol } from 'src/common/types/user-role.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import type { UserPayload } from 'src/common/interfaces/jwt-payload.interface';
+import type { AuthenticatedUser } from 'src/common/interfaces/authenticated-user.interface';
 
 @UseAuth(Rol.ADMINISTRADOR)
 @Controller('usuarios')
@@ -39,8 +39,9 @@ export class UsuariosController {
   @UseAuth(Rol.ADMINISTRADOR, Rol.SUPERVISOR)
   @Patch()
   @HttpCode(204)
-  async update(@CurrentUser() user: UserPayload, @Body() dto: UpdateUsuarioDto): Promise<void> {
-    await this.usuariosService.update(user.sub, dto);
+  async update(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateUsuarioDto): Promise<void> {
+    console.log(user)
+    await this.usuariosService.update(user.id, dto);
   }
 
   @UseAuth(Rol.ADMINISTRADOR)

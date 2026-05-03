@@ -15,10 +15,10 @@ import { PaginatedResultDto } from 'src/common/dtos/responses/paginated-result.d
 import { CreateDispositivoDto } from '../dtos/requests/create-dispositivo.dto';
 import { DispositivoDto } from '../dtos/responses/dispositivo.dto';
 import { DispositivosService } from '../services/dispositivos.service';
-import type { UserPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { UseAuth } from 'src/common/decorators/use-auth.decorator';
 import { Rol } from 'src/common/types/user-role.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import type { AuthenticatedUser } from 'src/common/interfaces/authenticated-user.interface';
 
 @Controller('dispositivos')
 export class DispositivosController {
@@ -28,9 +28,9 @@ export class DispositivosController {
   @Post()
   async create(
     @Body() dto: CreateDispositivoDto,
-    @CurrentUser() user: UserPayload,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<DispositivoDto> {
-    return this.dispositivosService.create(user.sub, dto);
+    return this.dispositivosService.create(user.id, dto);
   }
 
   @UseAuth(Rol.ADMINISTRADOR)
@@ -54,9 +54,9 @@ export class DispositivosController {
   @HttpCode(204)
   async update(
     @Param('deviceId', ParseUUIDPipe) deviceId: string,
-    @CurrentUser() user: UserPayload,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
-    await this.dispositivosService.update(deviceId, user.sub);
+    await this.dispositivosService.update(deviceId, user.id);
   }
 
   @UseAuth()

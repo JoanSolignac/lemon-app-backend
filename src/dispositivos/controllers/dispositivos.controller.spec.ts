@@ -3,7 +3,7 @@ import { BadRequestException, ParseUUIDPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { CreateDispositivoDto } from '../dtos/requests/create-dispositivo.dto';
-import { UserPayload } from 'src/common/interfaces/jwt-payload.interface';
+import { UserPayload } from 'src/auth/interfaces/jwt-payload.interface';
 import { Rol } from 'src/common/types/user-role.enum';
 import { DispositivosService } from '../services/dispositivos.service';
 import { DispositivosController } from './dispositivos.controller';
