@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
@@ -15,9 +15,13 @@ import { SyncQueryParams } from '../types/sync-query-params.type';
 
 @Injectable()
 export class UsuariosPrismaRepository implements IUsuariosRepository {
+  private readonly logger = new Logger(UsuariosPrismaRepository.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateUsuario): Promise<Usuario> {
+    this.logger.debug('create usuario');
+
     try {
       const prismaUsuario = await this.prisma.usuario.create({
         data: {
@@ -30,11 +34,17 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
       });
       return toDomain(prismaUsuario);
     } catch (error: unknown) {
+      this.logger.error(
+        'Prisma operation failed',
+        JSON.stringify(error, null, 2),
+      );
       this.handlePrismaError(error);
     }
   }
 
   async findById(id: string): Promise<Usuario | null> {
+    this.logger.debug('find usuario by id');
+
     const prismaUsuario = await this.prisma.usuario.findFirst({
       where: { id, deletedAt: null },
       select: SELECT_USUARIOS,
@@ -43,6 +53,8 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
   }
 
   async findByCorreoElectronico(correoElectronico: string): Promise<Usuario | null> {
+    this.logger.debug('find usuario by correo electronico');
+
     const prismaUsuario = await this.prisma.usuario.findFirst({
       where: { correoElectronico, deletedAt: null },
       select: SELECT_USUARIOS,
@@ -51,6 +63,8 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
   }
 
   async findForAuthByCorreoElectronico(correoElectronico: string): Promise<UsuarioForAuth | null> {
+    this.logger.debug('find usuario for auth by correo electronico');
+
     const prismaUsuarioForAuth = await this.prisma.usuario.findFirst({
       where: { correoElectronico, deletedAt: null },
       select: SELECT_USUARIO_FOR_AUTH,
@@ -59,6 +73,8 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
   }
 
   async findAllForPagination(params: PaginatedParams): Promise<{ data: Usuario[]; total: number }> {
+    this.logger.debug('find all usuarios');
+
     const { skip, take } = params;
     const where = { deletedAt: null };
 
@@ -82,6 +98,8 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
   }
 
   async update(params: UsuarioUpdateParams): Promise<void> {
+    this.logger.debug('update usuario');
+
     const { id, data } = params;
 
     try {
@@ -103,11 +121,17 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
         throw new NotFoundException('Usuario no encontrado.');
       }
     } catch (error: unknown) {
+      this.logger.error(
+        'Prisma operation failed',
+        JSON.stringify(error, null, 2),
+      );
       this.handlePrismaError(error);
     }
   }
 
   async softDelete(id: string): Promise<void> {
+    this.logger.debug('soft delete usuario');
+
     const result = await this.prisma.usuario.updateMany({
       where: {
         id,
@@ -135,6 +159,10 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
 
       let target = this.getUniqueConstraintTarget(error);
+
+      this.logger.debug(
+        `Unique constraint target: ${JSON.stringify(target)}`
+      );
 
       target = target.map(field =>
         field.toLowerCase().replace(/_/g, '')
@@ -170,36 +198,52 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     /**
      * @description Extrae los campos afectados por una restricción UNIQUE (P2002) de Prisma.
      *
-     * Prisma puede devolver `meta.target` en diferentes formatos:
+     * Con Prisma 7 + driver adapter PostgreSQL, el error viene en:
+     * error.meta.driverAdapterError.cause.constraint.fields
      *
-     * Ejemplos:
+     * Ejemplo:
      * {
      *   code: 'P2002',
-     *   meta: { target: ['numeroDocumento'] }
-     * }
-     *
-     * {
-     *   code: 'P2002',
-     *   meta: { target: 'numeroDocumento' }
-     * }
-     *
-     * {
-     *   code: 'P2002',
-     *   meta: { target: ['Cliente_numeroDocumento_key'] }
-     * }
-     *
-     * {
-     *   code: 'P2002',
-     *   meta: {}
+     *   meta: {
+     *     driverAdapterError: {
+     *       cause: {
+     *         constraint: {
+     *           fields: ['numeroDocumento']
+     *         }
+     *       }
+     *     }
+     *   }
      * }
      *
      * Esta función normaliza siempre el resultado a `string[]`
      * para poder procesarlo de forma segura en la lógica de negocio.
      */
-    const target = error.meta?.target;
+    const meta = error.meta;
 
-    return Array.isArray(target) ? target.filter((value): value is string => typeof value === "string") 
-      : typeof target === "string" ? [target] 
-      : [];
+    if (!meta) {
+      return [];
+    }
+
+    const driverAdapterError = meta.driverAdapterError;
+
+    if (!driverAdapterError || typeof driverAdapterError !== 'object') {
+      return [];
+    }
+
+    const cause = (driverAdapterError as Record<string, unknown>).cause;
+
+    if (!cause || typeof cause !== 'object') {
+      return [];
+    }
+
+    const constraint = (cause as Record<string, unknown>).constraint;
+
+    if (!constraint || typeof constraint !== 'object') {
+      return [];
+    }
+
+    const fields = (constraint as Record<string, unknown>).fields;
+
+    return Array.isArray(fields) ? fields.filter((value): value is string => typeof value === "string") : [];
   }
 }

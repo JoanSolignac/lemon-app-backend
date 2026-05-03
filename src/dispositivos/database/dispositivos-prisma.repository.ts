@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
@@ -12,9 +12,13 @@ import { CreateDispositivo } from '../types/create-dispositivo.type';
 
 @Injectable()
 export class DispositivosPrismaRepository implements IDispositivoRepository {
+  private readonly logger = new Logger(DispositivosPrismaRepository.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateDispositivo): Promise<Dispositivo> {
+    this.logger.debug('create dispositivo');
+
     try {
       const prismaDispositivo = await this.prisma.dispositivo.create({
         data: {
@@ -26,11 +30,17 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
       });
       return toDomain(prismaDispositivo);
     } catch (error: unknown) {
+      this.logger.error(
+        'Prisma operation failed',
+        JSON.stringify(error, null, 2),
+      );
       this.handlePrismaError(error);
     }
   }
 
   async findById(deviceId: string): Promise<Dispositivo | null> {
+    this.logger.debug('find dispositivo by id');
+
     const prismaDispositivo = await this.prisma.dispositivo.findFirst({
       where: { deviceId },
       select: SELECT_DISPOSITIVOS,
@@ -39,6 +49,8 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
   }
 
   async findAllForPagination(params: PaginatedParams): Promise<{ data: Dispositivo[]; total: number }> {
+    this.logger.debug('find all dispositivos');
+
     const { skip, take } = params;
 
     const [data, total] = await this.prisma.$transaction([
@@ -59,6 +71,8 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
   }
 
   async update(params: DispositivoUpdateParams): Promise<void> {
+    this.logger.debug('update dispositivo');
+
     const { deviceId, data } = params;
 
     try {
@@ -77,11 +91,17 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
         throw new NotFoundException('Dispositivo no encontrado.');
       }
     } catch (error: unknown) {
+      this.logger.error(
+        'Prisma operation failed',
+        JSON.stringify(error, null, 2),
+      );
       this.handlePrismaError(error);
     }
   }
 
   async softDelete(deviceId: string): Promise<void> {
+    this.logger.debug('soft delete dispositivo');
+
     const result = await this.prisma.dispositivo.updateMany({
       where: {
         deviceId,
@@ -109,6 +129,10 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       let target = this.getUniqueConstraintTarget(error);
 
+      this.logger.debug(
+        `Unique constraint target: ${JSON.stringify(target)}`
+      );
+
       target = target.map(field =>
         field.toLowerCase().replace(/_/g, '')
       );
@@ -135,36 +159,52 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
     /**
      * @description Extrae los campos afectados por una restricción UNIQUE (P2002) de Prisma.
      *
-     * Prisma puede devolver `meta.target` en diferentes formatos:
+     * Con Prisma 7 + driver adapter PostgreSQL, el error viene en:
+     * error.meta.driverAdapterError.cause.constraint.fields
      *
-     * Ejemplos:
+     * Ejemplo:
      * {
      *   code: 'P2002',
-     *   meta: { target: ['deviceId'] }
-     * }
-     *
-     * {
-     *   code: 'P2002',
-     *   meta: { target: 'deviceId' }
-     * }
-     *
-     * {
-     *   code: 'P2002',
-     *   meta: { target: ['Dispositivo_deviceId_key'] }
-     * }
-     *
-     * {
-     *   code: 'P2002',
-     *   meta: {}
+     *   meta: {
+     *     driverAdapterError: {
+     *       cause: {
+     *         constraint: {
+     *           fields: ['deviceId']
+     *         }
+     *       }
+     *     }
+     *   }
      * }
      *
      * Esta función normaliza siempre el resultado a `string[]`
      * para poder procesarlo de forma segura en la lógica de negocio.
      */
-    const target = error.meta?.target;
+    const meta = error.meta;
 
-    return Array.isArray(target) ? target.filter((value): value is string => typeof value === "string")
-      : typeof target === "string" ? [target]
-      : [];
+    if (!meta) {
+      return [];
+    }
+
+    const driverAdapterError = meta.driverAdapterError;
+
+    if (!driverAdapterError || typeof driverAdapterError !== 'object') {
+      return [];
+    }
+
+    const cause = (driverAdapterError as Record<string, unknown>).cause;
+
+    if (!cause || typeof cause !== 'object') {
+      return [];
+    }
+
+    const constraint = (cause as Record<string, unknown>).constraint;
+
+    if (!constraint || typeof constraint !== 'object') {
+      return [];
+    }
+
+    const fields = (constraint as Record<string, unknown>).fields;
+
+    return Array.isArray(fields) ? fields.filter((value): value is string => typeof value === "string") : [];
   }
 }
