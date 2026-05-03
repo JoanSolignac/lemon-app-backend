@@ -5,7 +5,7 @@ import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto'
 import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { ICLIENTE_REPOSITORY } from '../constants/cliente.constants';
 import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
-import { UpdateClienteDto } from '../dtos/requests/update-cliente';
+import { UpdateClienteDto } from '../dtos/requests/update-cliente.dto';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
 import { IClientesRepository } from '../repositories/clientes.repository';
 import { TipoDocumento, TipoCliente } from '../types/cliente.type';
@@ -41,6 +41,7 @@ describe('ClientesService', () => {
 
   const clienteMock = {
     ...createDto,
+    correoElectronico: 'contacto@lemon.com',
     activo: true,
     version: 1,
     createdAt: new Date(),
@@ -68,22 +69,21 @@ describe('ClientesService', () => {
 
   describe('create', () => {
     it('debe crear un nuevo cliente', async () => {
-
       clienteRepository.create.mockResolvedValue(clienteMock);
 
       const result = await clienteService.create(createDto);
 
       expect(clienteRepository.create).toHaveBeenCalledTimes(1);
-      expect(clienteRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...createDto,
-          activo: true,
-          version: 1,
-          deletedAt: null,
-          createdAt: expect.any(Date),
-          updatedAt: expect.any(Date),
-        }),
-      );
+      expect(clienteRepository.create).toHaveBeenCalledWith({
+        id: createDto.id,
+        razonSocial: createDto.razonSocial,
+        tipoDocumento: createDto.tipoDocumento,
+        numeroDocumento: createDto.numeroDocumento,
+        tipoCliente: createDto.tipoCliente,
+        numeroTelefono: createDto.numeroTelefono,
+        correoElectronico: createDto.correoElectronico ?? null,
+        direccion: createDto.direccion,
+      });
       expect(result).toEqual(clienteMock);
     });
 
@@ -97,7 +97,6 @@ describe('ClientesService', () => {
 
   describe('findById', () => {
     it('debe retornar un cliente si existe', async () => {
-      
       clienteRepository.findById.mockResolvedValue(clienteMock);
 
       const result = await clienteService.findById(ID_CLIENTE);
@@ -108,7 +107,6 @@ describe('ClientesService', () => {
     });
 
     it('debe retornar null si el cliente no existe', async () => {
-      
       clienteRepository.findById.mockResolvedValue(null);
 
       const result = await clienteService.findById(ID_CLIENTE);
@@ -162,9 +160,11 @@ describe('ClientesService', () => {
       expect(clienteRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         data: [clienteMock],
-        page: 2,
-        limit: 10,
-        total: 25,
+        meta: {
+          page: 2,
+          limit: 10,
+          total: 25,
+        },
       });
     });
 
@@ -176,9 +176,11 @@ describe('ClientesService', () => {
       expect(clienteRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         data: [],
-        page: 1,
-        limit: 100,
-        total: 0,
+        meta: {
+          page: 1,
+          limit: 100,
+          total: 0,
+        },
       });
     });
   });
@@ -197,7 +199,7 @@ describe('ClientesService', () => {
 
       expect(clienteRepository.update).toHaveBeenCalledWith({
         id: ID_CLIENTE,
-        data: updateDto
+        data: updateDto,
       });
       expect(result).toBeUndefined();
     });

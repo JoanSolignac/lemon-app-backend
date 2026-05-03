@@ -7,37 +7,37 @@ export class UpdateClienteDto {
   @IsString()
   @Length(3, 150)
   @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
-  readonly razonSocial?: string;
+  declare readonly razonSocial?: string;
 
   @IsOptional()
   @IsEnum(TipoDocumento)
-  readonly tipoDocumento?: TipoDocumento;
+  declare readonly tipoDocumento?: TipoDocumento;
 
   @IsOptional()
   @IsString()
   @Length(8, 11)
-  readonly numeroDocumento?: string;
+  declare readonly numeroDocumento?: string;
 
   @IsOptional()
   @IsEnum(TipoCliente)
-  readonly tipoCliente?: TipoCliente;
+  declare readonly tipoCliente?: TipoCliente;
 
   @IsOptional()
   @IsString()
   @Length(6, 9)
-  readonly numeroTelefono?: string;
+  declare readonly numeroTelefono?: string;
 
   @IsOptional()
   @IsString()
   @IsEmail()
   @Transform(({ value }) => typeof value === 'string' ? value.toLowerCase() : value)
-  readonly correoElectronico?: string;
+  declare readonly correoElectronico?: string;
 
   @IsOptional()
   @IsString()
   @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
-  readonly direccion?: string;
+  declare readonly direccion?: string;
 
   @IsInt()
-  readonly version!: number;
+  declare readonly version: number;
 }
