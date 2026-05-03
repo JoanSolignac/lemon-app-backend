@@ -5,7 +5,7 @@ import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto'
 import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
-import { UserPayload } from 'src/common/interfaces/jwt-payload.interface';
+import { UserPayload } from 'src/auth/interfaces/jwt-payload.interface';
 import { Rol } from 'src/common/types/user-role.enum';
 import { UsuariosService } from '../services/usuarios.service';
 import { UsuariosController } from './usuarios.controller';

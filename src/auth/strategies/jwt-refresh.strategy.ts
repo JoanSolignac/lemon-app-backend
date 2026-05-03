@@ -2,7 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { UserPayload } from "../../common/interfaces/jwt-payload.interface";
+import { UserPayload } from "../interfaces/jwt-payload.interface";
+import { AuthenticatedUser } from "src/common/interfaces/authenticated-user.interface";
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
@@ -16,7 +17,11 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
         });
     };
 
-    validate(payload: UserPayload): UserPayload {
-        return payload;
+    async validate(payload: UserPayload): Promise<AuthenticatedUser> { 
+        return {
+            id: payload.sub,
+            correoElectronico: payload.email,
+            rol: payload.rol
+        };
     }
 }

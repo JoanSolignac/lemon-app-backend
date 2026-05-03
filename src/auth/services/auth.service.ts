@@ -5,8 +5,9 @@ import { HashService } from 'src/hash/services/hash.service';
 import { UsuariosService } from 'src/usuarios/services/usuarios.service';
 import { LoginDto } from '../dtos/requests/login.dto';
 import { UsuarioForAuth } from 'src/usuarios/types/usuario-for-auth.type';
-import { UserPayload } from '../../common/interfaces/jwt-payload.interface';
 import { AccessTokenDto } from '../dtos/responses/access-token.dto';
+import { AuthenticatedUser } from 'src/common/interfaces/authenticated-user.interface';
+import { UserPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -26,8 +27,9 @@ export class AuthService {
         return this.signTokens(userPayload);
     }
 
-    async refresh(payload: UserPayload): Promise<AccessTokenDto> {
-        return this.signTokens(payload);
+    async refresh(authenticatedUser: AuthenticatedUser): Promise<AccessTokenDto> {
+        const userPayload = this.createPayload(authenticatedUser);
+        return this.signTokens(userPayload);
     }
 
     private async validateCredentials(email: string, password: string): Promise<UsuarioForAuth | null> {
@@ -38,11 +40,11 @@ export class AuthService {
         return usuario;
     }
 
-    private createPayload(authUser: UsuarioForAuth): UserPayload {
+    private createPayload(user: UsuarioForAuth | AuthenticatedUser): UserPayload {
         return {
-            sub: authUser.id,
-            email: authUser.correoElectronico,
-            rol: authUser.rol
+            sub: user.id,
+            email: user.correoElectronico,
+            rol: user.rol
         };
     }
 
