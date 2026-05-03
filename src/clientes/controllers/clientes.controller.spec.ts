@@ -5,7 +5,7 @@ import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto'
 import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
-import { UpdateClienteDto } from '../dtos/requests/update-cliente';
+import { UpdateClienteDto } from '../dtos/requests/update-cliente.dto';
 import { ClientesService } from '../services/clientes.service';
 import { TipoDocumento, TipoCliente } from '../types/cliente.type';
 import { ClientesController } from './clientes.controller';
@@ -32,7 +32,7 @@ describe('ClientesController', () => {
     numeroDocumento: '20123456781',
     tipoCliente: TipoCliente.MAYORISTA,
     numeroTelefono: '987654321',
-    correoElectronico: 'contacto@lemon.pe',
+    correoElectronico: 'contacto@lemon.com',
     direccion: 'IQUITOS',
     activo: true,
     version: 1,
@@ -72,7 +72,7 @@ describe('ClientesController', () => {
         numeroDocumento: '20123456781',
         tipoCliente: TipoCliente.MAYORISTA,
         numeroTelefono: '987654321',
-        correoElectronico: 'contacto@lemon.pe',
+        correoElectronico: 'contacto@lemon.com',
         direccion: 'IQUITOS',
       };
       clientesService.create.mockResolvedValue(clienteMock);
@@ -123,9 +123,11 @@ describe('ClientesController', () => {
       const dto: PaginatedQueryDto = { page: 1, limit: 10 };
       const paginatedResult = {
         data: [clienteMock],
-        page: 1,
-        limit: 10,
-        total: 1,
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 1,
+        },
       };
       clientesService.findAllPaginated.mockResolvedValue(paginatedResult);
 

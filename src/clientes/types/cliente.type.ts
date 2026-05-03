@@ -15,7 +15,7 @@ export type Cliente = {
   numeroDocumento: string
   tipoCliente: TipoCliente
   numeroTelefono: string
-  correoElectronico?: string | null
+  correoElectronico: string | null
   direccion: string
 
   activo: boolean
@@ -23,5 +23,5 @@ export type Cliente = {
 
   createdAt: Date
   updatedAt: Date
-  deletedAt?: Date | null
+  deletedAt: Date | null
 }

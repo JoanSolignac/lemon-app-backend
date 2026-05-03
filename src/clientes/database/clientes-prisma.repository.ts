@@ -7,14 +7,16 @@ import { Cliente } from '../types/cliente.type';
 import { SELECT_CLIENTES } from '../types/cliente-select.type';
 import { ClienteUpdateParams } from '../types/cliente-update-params.type';
 import { SoftDeleteParams } from '../types/soft-delete-params.type';
-import { SyncQueryParams } from '../types/sync-query-params.type';
+import { SyncQueryParams } from '../../common/types/sync-query-params.type';
+import { CreateCliente } from '../types/create-cliente.type';
 import { CLIENTE_CORREO_ELECTRONICO_CONFLICT, CLIENTE_ID_CONFLICT, CLIENTE_NUMERO_DOCUMENTO_CONFLICT, CLIENTE_NUMERO_TELEFONO_CONFLICT } from '../errors/clientes.errors';
 import { toDomain, toDomainList, toPrismaTipoDocumento, toPrismaTipoCliente } from './cliente-prisma-mapper';
+
 @Injectable()
 export class ClientesPrismaRepository implements IClientesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Cliente): Promise<Cliente> {
+  async create(data: CreateCliente): Promise<Cliente> {
     try {
       const prismaCliente = await this.prisma.cliente.create({
         data: {
@@ -26,9 +28,6 @@ export class ClientesPrismaRepository implements IClientesRepository {
           numeroTelefono: data.numeroTelefono,
           correoElectronico: data.correoElectronico,
           direccion: data.direccion,
-          activo: data.activo,
-          version: data.version,
-          deletedAt: data.deletedAt ?? null,
         },
         select: SELECT_CLIENTES,
       });

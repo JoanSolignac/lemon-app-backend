@@ -2,10 +2,11 @@ import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { ClienteUpdateParams } from '../types/cliente-update-params.type';
 import { Cliente } from '../types/cliente.type'
 import { SoftDeleteParams } from '../types/soft-delete-params.type';
-import { SyncQueryParams } from '../types/sync-query-params.type';
+import { SyncQueryParams } from '../../common/types/sync-query-params.type';
+import { CreateCliente } from '../types/create-cliente.type';
 
 export interface IClientesRepository {
-  create(data: Cliente): Promise<Cliente>
+  create(data: CreateCliente): Promise<Cliente>
 
   findById(id: string): Promise<Cliente | null>
 

@@ -1,15 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
+import { PaginatedResultDto } from 'src/common/dtos/responses/paginated-result.dto';
 import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
-import { PaginatedResult } from 'src/common/types/paginated-result.type';
 import { calculateSkipTakeForPagination, normalizePaginationDto } from 'src/common/utils/pagination.util';
 import { ICLIENTE_REPOSITORY } from '../constants/cliente.constants';
 import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
-import { UpdateClienteDto } from '../dtos/requests/update-cliente';
+import { UpdateClienteDto } from '../dtos/requests/update-cliente.dto';
 import { ClienteResponseDto } from '../dtos/responses/cliente-response.dto';
 import type { IClientesRepository } from '../repositories/clientes.repository';
 import { Cliente } from '../types/cliente.type';
+import { CreateCliente } from '../types/create-cliente.type';
 
 @Injectable()
 export class ClientesService {
@@ -19,8 +20,7 @@ export class ClientesService {
   ) {}
 
   async create(dto: CreateClienteDto): Promise<ClienteResponseDto> {
-    const now = new Date();
-    const cliente: Cliente = {
+    const cliente: CreateCliente = {
       id: dto.id,
       razonSocial: dto.razonSocial,
       tipoDocumento: dto.tipoDocumento,
@@ -29,11 +29,6 @@ export class ClientesService {
       numeroTelefono: dto.numeroTelefono,
       correoElectronico: dto.correoElectronico ?? null,
       direccion: dto.direccion,
-      activo: true,
-      version: 1,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
     };
 
     const createdCliente = await this.clienteRepository.create(cliente);
@@ -59,16 +54,18 @@ export class ClientesService {
     return clientes.map((c) => this.toResponse(c));
   }
 
-  async findAllPaginated(dto: PaginatedQueryDto): Promise<PaginatedResult<ClienteResponseDto>> {
+  async findAllPaginated(dto: PaginatedQueryDto): Promise<PaginatedResultDto<ClienteResponseDto>> {
     const { page, limit } = normalizePaginationDto(dto);
     const { skip, take } = calculateSkipTakeForPagination({ page, limit });
     const { data, total } = await this.clienteRepository.findAllForPagination({ skip, take });
 
     return {
       data: data.map((c) => this.toResponse(c)),
-      page,
-      limit,
-      total,
+      meta: {
+        page,
+        limit,
+        total,
+      },
     };
   }
 
@@ -103,13 +100,13 @@ export class ClientesService {
       numeroDocumento: cliente.numeroDocumento,
       tipoCliente: cliente.tipoCliente,
       numeroTelefono: cliente.numeroTelefono,
-      correoElectronico: cliente.correoElectronico ?? null,
+      correoElectronico: cliente.correoElectronico,
       direccion: cliente.direccion,
       activo: cliente.activo,
       version: cliente.version,
       createdAt: cliente.createdAt,
       updatedAt: cliente.updatedAt,
-      deletedAt: cliente.deletedAt ?? null,
+      deletedAt: cliente.deletedAt,
     };
   }
 }
