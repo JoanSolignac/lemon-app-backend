@@ -25,7 +25,8 @@
     "prisma:dev:studio": "dotenv -e .env.dev -- npx prisma studio",
     "prisma:test:migrate": "dotenv -e .env.test -- npx prisma migrate dev",
     "prisma:test:deploy": "dotenv -e .env.test -- npx prisma migrate deploy",
-    "db:seed:dev": "dotenv -e .env.dev -- ts-node prisma/seed.ts"
+    "db:seed:dev": "dotenv -e .env.dev -- ts-node prisma/seed.ts",
+    "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
