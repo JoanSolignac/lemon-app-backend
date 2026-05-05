@@ -11,10 +11,14 @@ import { HashModule } from './hash/hash.module';
 import { AuthModule } from './auth/auth.module';
 import { DispositivosModule } from './dispositivos/dispositivos.module';
 
+const nodeEnv = process.env.NODE_ENV ?? 'prod';
+
+const envFilePath = nodeEnv === "prod" ? '.env' : `.env.${nodeEnv}`;
+
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'dev'}`,
+      envFilePath,
       validationSchema: VALIDATION_SCHEMA,
       load: [APP_CONFIG, DATABASE_CONFIG, JWT_CONFIG],
       isGlobal: true,
