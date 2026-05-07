@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { config } from 'process';
 import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionFilter } from './common/filters/exception/all-exception.filter';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,12 +25,36 @@ async function bootstrap() {
     })
   );
 
-  const configService = app.get(ConfigService);
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Lemon App API')
+    .setDescription('Documentación de la API de Lemon App')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+    
 
-  const port = configService.getOrThrow('app.port');
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-  console.log(`Starting server on port ${port}...`);
+  SwaggerModule.setup('api/v1/docs', app, document);
+
+  app.enableCors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:4200',
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  });
+
+  const port = process.env.PORT ?? 3000;
 
   await app.listen(port);
+
+  console.log(`Servidor levantado en http://localhost:${port}`);
+  console.log(`Swagger disponible en http://localhost:${port}/api/v1/docs`);
+
+
 }
 bootstrap();

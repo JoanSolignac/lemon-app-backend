@@ -4,7 +4,7 @@ import type { IDispositivoRepository } from '../repositories/dispositivo.reposit
 import { CreateDispositivoDto } from '../dtos/requests/create-dispositivo.dto';
 import { CreateDispositivo } from '../types/create-dispositivo.type';
 import { Dispositivo } from '../types/dispositivo.type';
-import { DispositivoDto } from '../dtos/responses/dispositivo.dto';
+import { DeviceMetadataDto, DispositivoDto, } from '../dtos/responses/dispositivo.dto';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { PaginatedResultDto } from 'src/common/dtos/responses/paginated-result.dto';
 import {
@@ -83,19 +83,21 @@ export class DispositivosService {
   }
 
   private toResponse(dispositivo: Dispositivo): DispositivoDto {
-    return {
+    return Object.assign(new DispositivoDto(), {
       deviceId: dispositivo.deviceId,
       userId: dispositivo.userId,
       activo: dispositivo.activo,
       lastSyncAt: dispositivo.lastSyncAt,
-      metadata: dispositivo.metadata && {
-        name: dispositivo.metadata.name,
-        platform: dispositivo.metadata.platform,
-        version: dispositivo.metadata.version,
-      },
+      metadata: dispositivo.metadata
+        ? Object.assign(new DeviceMetadataDto(), {
+            name: dispositivo.metadata.name,
+            platform: dispositivo.metadata.platform,
+            version: dispositivo.metadata.version,
+          })
+        : null,
       createdAt: dispositivo.createdAt,
       updatedAt: dispositivo.updatedAt,
       deletedAt: dispositivo.deletedAt,
-    };
+    });
   }
 }
