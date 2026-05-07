@@ -10,13 +10,16 @@ const MAX_LIMIT = 100;
  *
  * Debe ejecutarse antes de calcular skip/take.
  */
-export const normalizePaginationDto = (params: { page: number; limit: number }) => {
-    let { page, limit } = params;
+export const normalizePaginationDto = (params: {
+  page: number;
+  limit: number;
+}) => {
+  let { page, limit } = params;
 
-    page = Number.isFinite(page) ? Math.max(page, 1) : 1;
-    limit = Number.isFinite(limit) ? Math.min(Math.max(limit, 1), MAX_LIMIT) : 1;
+  page = Number.isFinite(page) ? Math.max(page, 1) : 1;
+  limit = Number.isFinite(limit) ? Math.min(Math.max(limit, 1), MAX_LIMIT) : 1;
 
-    return { page, limit };
+  return { page, limit };
 };
 
 /**
@@ -27,11 +30,14 @@ export const normalizePaginationDto = (params: { page: number; limit: number }) 
  *
  * Asume que ya se ejecutó normalizePaginationDto.
  */
-export const calculateSkipTakeForPagination = (params: { page: number; limit: number }) => {
-    const skip = (params.page - 1) * params.limit;
+export const calculateSkipTakeForPagination = (params: {
+  page: number;
+  limit: number;
+}) => {
+  const skip = (params.page - 1) * params.limit;
 
-    return {
-        skip,
-        take: params.limit,
-    };
+  return {
+    skip,
+    take: params.limit,
+  };
 };

@@ -13,7 +13,7 @@ import { DispositivosModule } from './dispositivos/dispositivos.module';
 
 const nodeEnv = process.env.NODE_ENV ?? 'prod';
 
-const envFilePath = nodeEnv === "prod" ? '.env' : `.env.${nodeEnv}`;
+const envFilePath = nodeEnv === 'prod' ? '.env' : `.env.${nodeEnv}`;
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ const envFilePath = nodeEnv === "prod" ? '.env' : `.env.${nodeEnv}`;
     UsuariosModule,
     HashModule,
     AuthModule,
-    DispositivosModule
+    DispositivosModule,
   ],
 })
 export class AppModule {}

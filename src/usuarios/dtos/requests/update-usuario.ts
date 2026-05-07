@@ -5,13 +5,17 @@ export class UpdateUsuarioDto {
   @IsOptional()
   @IsString()
   @Length(3, 120)
-  @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
+  @Transform(({ value }): string =>
+    typeof value === 'string' ? value.toUpperCase() : value,
+  )
   declare readonly nombre?: string;
 
   @IsOptional()
   @IsString()
   @IsEmail()
-  @Transform(({ value }) => typeof value === 'string' ? value.toLowerCase() : value)
+  @Transform(({ value }): string =>
+    typeof value === 'string' ? value.toLowerCase() : value,
+  )
   declare readonly correoElectronico?: string;
 
   @IsOptional()

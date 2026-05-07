@@ -1,4 +1,4 @@
 export type SoftDeleteParams = {
-    id: string,
-    version: number
-}
+  id: string;
+  version: number;
+};

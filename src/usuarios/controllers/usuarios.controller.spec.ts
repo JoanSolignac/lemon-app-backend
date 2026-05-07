@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { BadRequestException, ParseUUIDPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
-import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
+import { AuthenticatedUser } from 'src/common/interfaces/authenticated-user.interface';
+import { Rol } from 'src/common/types/user-role.enum';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
-import { UserPayload } from 'src/auth/interfaces/jwt-payload.interface';
-import { Rol } from 'src/common/types/user-role.enum';
+import { UsuarioResponseDto } from '../dtos/responses/usuario-response.dto';
 import { UsuariosService } from '../services/usuarios.service';
 import { UsuariosController } from './usuarios.controller';
 
@@ -17,21 +17,15 @@ describe('UsuariosController', () => {
     create: jest.fn(),
     findById: jest.fn(),
     findByCorreoElectronico: jest.fn(),
-    findAllForSync: jest.fn(),
     findAllPaginated: jest.fn(),
     update: jest.fn(),
     updateRol: jest.fn(),
     delete: jest.fn(),
   } as unknown as jest.Mocked<UsuariosService>;
 
-  enum Rol {
-    ADMINISTRADOR = 'ADMINISTRADOR',
-    SUPERVISOR = 'SUPERVISOR',
-  }
-
   const ID_USUARIO = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
 
-  const usuarioMock = {
+  const usuarioMock = new UsuarioResponseDto({
     id: ID_USUARIO,
     rol: Rol.ADMINISTRADOR,
     nombre: 'JUAN PEREZ',
@@ -40,7 +34,7 @@ describe('UsuariosController', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
-  };
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -98,7 +92,9 @@ describe('UsuariosController', () => {
 
       const result = await controller.findByCorreoElectronico('admin@lemon.pe');
 
-      expect(usuariosService.findByCorreoElectronico).toHaveBeenCalledWith('admin@lemon.pe');
+      expect(usuariosService.findByCorreoElectronico).toHaveBeenCalledWith(
+        'admin@lemon.pe',
+      );
       expect(result).toEqual(usuarioMock);
     });
   });
@@ -128,9 +124,9 @@ describe('UsuariosController', () => {
       const dto: UpdateUsuarioDto = {
         nombre: 'JUAN PEREZ',
       };
-      const user: UserPayload = {
-        sub: ID_USUARIO,
-        email: 'admin@lemon.pe',
+      const user: AuthenticatedUser = {
+        id: ID_USUARIO,
+        correoElectronico: 'admin@lemon.pe',
         rol: Rol.ADMINISTRADOR,
       };
       usuariosService.update.mockResolvedValue();
@@ -171,7 +167,10 @@ describe('UsuariosController', () => {
     it('debe aceptar un UUID válido', async () => {
       const validUuid = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
 
-      const result = await pipe.transform(validUuid, { type: 'param', metatype: String });
+      const result = await pipe.transform(validUuid, {
+        type: 'param',
+        metatype: String,
+      });
 
       expect(result).toBe(validUuid);
     });
@@ -179,17 +178,17 @@ describe('UsuariosController', () => {
     it('debe lanzar BadRequestException para un ID inválido', async () => {
       const invalidId = 'usr-001';
 
-      await expect(pipe.transform(invalidId, { type: 'param', metatype: String })).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(invalidId, { type: 'param', metatype: String }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('debe lanzar BadRequestException para un UUID con formato incorrecto', async () => {
       const malformedUuid = 'not-a-uuid';
 
-      await expect(pipe.transform(malformedUuid, { type: 'param', metatype: String })).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(malformedUuid, { type: 'param', metatype: String }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

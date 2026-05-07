@@ -9,9 +9,9 @@ import { ICLIENTE_REPOSITORY } from './constants/cliente.constants';
   providers: [
     {
       provide: ICLIENTE_REPOSITORY,
-      useClass: ClientesPrismaRepository
+      useClass: ClientesPrismaRepository,
     },
-    ClientesService
-  ]
+    ClientesService,
+  ],
 })
 export class ClientesModule {}

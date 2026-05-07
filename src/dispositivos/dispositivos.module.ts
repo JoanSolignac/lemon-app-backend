@@ -8,10 +8,10 @@ import { DispositivosController } from './controllers/dispositivos.controller';
   providers: [
     {
       provide: IDISPOSITIVO_REPOSITORY,
-      useClass: DispositivosPrismaRepository
+      useClass: DispositivosPrismaRepository,
     },
-    DispositivosService
+    DispositivosService,
   ],
-  controllers: [DispositivosController]
+  controllers: [DispositivosController],
 })
 export class DispositivosModule {}

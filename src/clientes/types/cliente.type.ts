@@ -9,19 +9,19 @@ export enum TipoCliente {
 }
 
 export type Cliente = {
-  id: string
-  razonSocial: string
-  tipoDocumento: TipoDocumento
-  numeroDocumento: string
-  tipoCliente: TipoCliente
-  numeroTelefono: string
-  correoElectronico: string | null
-  direccion: string
+  id: string;
+  razonSocial: string;
+  tipoDocumento: TipoDocumento;
+  numeroDocumento: string;
+  tipoCliente: TipoCliente;
+  numeroTelefono: string;
+  correoElectronico: string | null;
+  direccion: string;
 
-  activo: boolean
-  version: number
+  activo: boolean;
+  version: number;
 
-  createdAt: Date
-  updatedAt: Date
-  deletedAt: Date | null
-}
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+};

@@ -1,6 +1,6 @@
-import { UpdateCliente } from "./update-cliente.type";
+import { UpdateCliente } from './update-cliente.type';
 
 export type ClienteUpdateParams = {
-    id: string,
-    data: UpdateCliente
-}
+  id: string;
+  data: UpdateCliente;
+};

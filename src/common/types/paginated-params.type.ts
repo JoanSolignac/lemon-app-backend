@@ -1,4 +1,4 @@
 export type PaginatedParams = {
-    skip: number,
-    take: number
-}
+  skip: number;
+  take: number;
+};

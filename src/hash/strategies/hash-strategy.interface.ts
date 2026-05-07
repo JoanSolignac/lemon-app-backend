@@ -1,4 +1,4 @@
-export interface HashStrategy{
-    hash(password: string): Promise<string>;
-    compare(password: string, hashPassword: string): Promise<boolean>;
+export interface HashStrategy {
+  hash(password: string): Promise<string>;
+  compare(password: string, hashPassword: string): Promise<boolean>;
 }

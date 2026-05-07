@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { IDISPOSITIVO_REPOSITORY } from '../constants/dispositivos.constants';
 import { CreateDispositivoDto } from '../dtos/requests/create-dispositivo.dto';
 import { IDispositivoRepository } from '../repositories/dispositivo.repository';
+import { Dispositivo } from '../types/dispositivo.type';
 import { DispositivosService } from './dispositivos.service';
 
 describe('DispositivosService', () => {
@@ -30,7 +30,7 @@ describe('DispositivosService', () => {
     },
   };
 
-  const dispositivoMock = {
+  const dispositivoMock: Dispositivo = {
     deviceId: DEVICE_ID,
     userId: USER_ID,
     activo: true,
@@ -91,7 +91,9 @@ describe('DispositivosService', () => {
       const error = new Error('Error al crear dispositivo');
       dispositivoRepository.create.mockRejectedValue(error);
 
-      await expect(dispositivosService.create(USER_ID, createDto)).rejects.toThrow('Error al crear dispositivo');
+      await expect(
+        dispositivosService.create(USER_ID, createDto),
+      ).rejects.toThrow('Error al crear dispositivo');
       expect(dispositivoRepository.create).toHaveBeenCalledTimes(1);
     });
   });
@@ -116,10 +118,12 @@ describe('DispositivosService', () => {
       });
     });
 
-    it('debe lanzar NotFoundException si el dispositivo no existe', async () => {
+    it('debe retornar null si el dispositivo no existe', async () => {
       dispositivoRepository.findById.mockResolvedValue(null);
 
-      await expect(dispositivosService.findById(DEVICE_ID)).rejects.toThrow(NotFoundException);
+      const result = await dispositivosService.findById(DEVICE_ID);
+
+      expect(result).toBeNull();
       expect(dispositivoRepository.findById).toHaveBeenCalledWith(DEVICE_ID);
       expect(dispositivoRepository.findById).toHaveBeenCalledTimes(1);
     });
@@ -135,8 +139,13 @@ describe('DispositivosService', () => {
 
       const result = await dispositivosService.findAllForPagination(dto);
 
-      expect(dispositivoRepository.findAllForPagination).toHaveBeenCalledWith({ skip: 10, take: 10 });
-      expect(dispositivoRepository.findAllForPagination).toHaveBeenCalledTimes(1);
+      expect(dispositivoRepository.findAllForPagination).toHaveBeenCalledWith({
+        skip: 10,
+        take: 10,
+      });
+      expect(dispositivoRepository.findAllForPagination).toHaveBeenCalledTimes(
+        1,
+      );
       expect(result).toEqual({
         data: [
           {
@@ -160,12 +169,20 @@ describe('DispositivosService', () => {
 
     it('debe normalizar parámetros de paginación', async () => {
       const dto: PaginatedQueryDto = { page: 0, limit: 500 };
-      dispositivoRepository.findAllForPagination.mockResolvedValue({ data: [], total: 0 });
+      dispositivoRepository.findAllForPagination.mockResolvedValue({
+        data: [],
+        total: 0,
+      });
 
       const result = await dispositivosService.findAllForPagination(dto);
 
-      expect(dispositivoRepository.findAllForPagination).toHaveBeenCalledWith({ skip: 0, take: 100 });
-      expect(dispositivoRepository.findAllForPagination).toHaveBeenCalledTimes(1);
+      expect(dispositivoRepository.findAllForPagination).toHaveBeenCalledWith({
+        skip: 0,
+        take: 100,
+      });
+      expect(dispositivoRepository.findAllForPagination).toHaveBeenCalledTimes(
+        1,
+      );
       expect(result).toEqual({
         data: [],
         meta: {
@@ -196,7 +213,9 @@ describe('DispositivosService', () => {
       const error = new Error('Error al actualizar dispositivo');
       dispositivoRepository.update.mockRejectedValue(error);
 
-      await expect(dispositivosService.update(DEVICE_ID, USER_ID)).rejects.toThrow('Error al actualizar dispositivo');
+      await expect(
+        dispositivosService.update(DEVICE_ID, USER_ID),
+      ).rejects.toThrow('Error al actualizar dispositivo');
       expect(dispositivoRepository.update).toHaveBeenCalledTimes(1);
     });
   });
@@ -220,7 +239,9 @@ describe('DispositivosService', () => {
       const error = new Error('Error al actualizar sincronización');
       dispositivoRepository.update.mockRejectedValue(error);
 
-      await expect(dispositivosService.updateLastSync(DEVICE_ID)).rejects.toThrow('Error al actualizar sincronización');
+      await expect(
+        dispositivosService.updateLastSync(DEVICE_ID),
+      ).rejects.toThrow('Error al actualizar sincronización');
       expect(dispositivoRepository.update).toHaveBeenCalledTimes(1);
     });
   });
@@ -239,7 +260,9 @@ describe('DispositivosService', () => {
       const error = new Error('Error al eliminar dispositivo');
       dispositivoRepository.softDelete.mockRejectedValue(error);
 
-      await expect(dispositivosService.delete(DEVICE_ID)).rejects.toThrow('Error al eliminar dispositivo');
+      await expect(dispositivosService.delete(DEVICE_ID)).rejects.toThrow(
+        'Error al eliminar dispositivo',
+      );
       expect(dispositivoRepository.softDelete).toHaveBeenCalledTimes(1);
     });
   });

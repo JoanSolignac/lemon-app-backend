@@ -13,37 +13,37 @@ import { JwtRefreshGuard } from 'src/common/guards/jwt-refresh.guard';
 import { RolGuard } from 'src/common/guards/rol.guard';
 
 @Module({
-    imports: [
-        PassportModule.register({ defaultStrategy: 'jwt-access' }),
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            inject: [ConfigService],
-            useFactory: (config: ConfigService) => ({
-                secret: config.getOrThrow<string>('jwt.secret'),
-                signOptions: {
-                    expiresIn: config.getOrThrow('jwt.expiresIn'),
-                }
-            })
-        }),
-        UsuariosModule,
-        HashModule,
-    ],
-    controllers: [AuthController],
-    providers: [
-        AuthService,
-        JwtAccessStrategy,
-        JwtRefreshStrategy,
-        JwtAccessGuard,
-        JwtRefreshGuard,
-        RolGuard,
-    ],
-    exports: [
-        AuthService,
-        JwtAccessGuard,
-        JwtRefreshGuard,
-        RolGuard,
-        PassportModule,
-        JwtModule,
-    ],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt-access' }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('jwt.secret'),
+        signOptions: {
+          expiresIn: config.getOrThrow('jwt.expiresIn'),
+        },
+      }),
+    }),
+    UsuariosModule,
+    HashModule,
+  ],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    JwtAccessStrategy,
+    JwtRefreshStrategy,
+    JwtAccessGuard,
+    JwtRefreshGuard,
+    RolGuard,
+  ],
+  exports: [
+    AuthService,
+    JwtAccessGuard,
+    JwtRefreshGuard,
+    RolGuard,
+    PassportModule,
+    JwtModule,
+  ],
 })
 export class AuthModule {}

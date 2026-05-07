@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
@@ -48,7 +53,9 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
     return prismaDispositivo ? toDomain(prismaDispositivo) : null;
   }
 
-  async findAllForPagination(params: PaginatedParams): Promise<{ data: Dispositivo[]; total: number }> {
+  async findAllForPagination(
+    params: PaginatedParams,
+  ): Promise<{ data: Dispositivo[]; total: number }> {
     this.logger.debug('find all dispositivos');
 
     const { skip, take } = params;
@@ -57,14 +64,10 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
       this.prisma.dispositivo.findMany({
         skip,
         take,
-        orderBy: [
-          { createdAt: 'desc' },
-          { deviceId: 'desc' },
-        ],
+        orderBy: [{ createdAt: 'desc' }, { deviceId: 'desc' }],
         select: SELECT_DISPOSITIVOS,
       }),
-      this.prisma.dispositivo.count({
-      }),
+      this.prisma.dispositivo.count({}),
     ]);
 
     return { data: toDomainList(data), total };
@@ -119,25 +122,30 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
   }
 
   private handlePrismaError(error: unknown): never {
-    if (error instanceof ConflictException || error instanceof NotFoundException) {
+    if (
+      error instanceof ConflictException ||
+      error instanceof NotFoundException
+    ) {
       throw error;
     }
 
     /**
      * @description Maneja errores de Prisma relacionados con violaciones de restricciones UNIQUE (P2002).
      */
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
       let target = this.getUniqueConstraintTarget(error);
 
-      this.logger.debug(
-        `Unique constraint target: ${JSON.stringify(target)}`
-      );
+      this.logger.debug(`Unique constraint target: ${JSON.stringify(target)}`);
 
-      target = target.map(field =>
-        field.toLowerCase().replace(/_/g, '')
-      );
+      target = target.map((field) => field.toLowerCase().replace(/_/g, ''));
 
-      if (target.some(field => field.includes('deviceid')) || target.some(field => field.includes('id'))) {
+      if (
+        target.some((field) => field.includes('deviceid')) ||
+        target.some((field) => field.includes('id'))
+      ) {
         throw new ConflictException({
           code: DISPOSITIVO_ID_CONFLICT,
           message: 'El dispositivo ya existe.',
@@ -148,14 +156,19 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
     /**
      * @description Maneja errores de Prisma cuando un registro requerido no existe (P2025).
      */
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    ) {
       throw new NotFoundException('Dispositivo no encontrado.');
     }
 
     throw error;
   }
 
-  private getUniqueConstraintTarget(error: Prisma.PrismaClientKnownRequestError): string[] {
+  private getUniqueConstraintTarget(
+    error: Prisma.PrismaClientKnownRequestError,
+  ): string[] {
     /**
      * @description Extrae los campos afectados por una restricción UNIQUE (P2002) de Prisma.
      *
@@ -205,6 +218,8 @@ export class DispositivosPrismaRepository implements IDispositivoRepository {
 
     const fields = (constraint as Record<string, unknown>).fields;
 
-    return Array.isArray(fields) ? fields.filter((value): value is string => typeof value === "string") : [];
+    return Array.isArray(fields)
+      ? fields.filter((value): value is string => typeof value === 'string')
+      : [];
   }
 }

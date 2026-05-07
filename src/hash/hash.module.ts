@@ -8,7 +8,7 @@ import { Argon2Strategy } from './strategies/argon2.strategy';
     HashService,
     {
       provide: HASH_STRATEGY,
-      useClass: Argon2Strategy
+      useClass: Argon2Strategy,
     },
   ],
   exports: [HashService],

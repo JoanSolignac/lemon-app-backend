@@ -3,8 +3,8 @@ import { BadRequestException, ParseUUIDPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
 import { CreateDispositivoDto } from '../dtos/requests/create-dispositivo.dto';
-import { UserPayload } from 'src/auth/interfaces/jwt-payload.interface';
-import { Rol } from 'src/common/types/user-role.enum';
+import { AuthenticatedUser } from 'src/common/interfaces/authenticated-user.interface';
+import { DispositivoResponseDto } from '../dtos/responses/dispositivo.dto';
 import { DispositivosService } from '../services/dispositivos.service';
 import { DispositivosController } from './dispositivos.controller';
 
@@ -23,7 +23,7 @@ describe('DispositivosController', () => {
   const DEVICE_ID = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
   const USER_ID = '3a6e8d4f-1b2c-5c9e-9f3b-8e8d9e8e5b22';
 
-  const dispositivoMock = {
+  const dispositivoMock = new DispositivoResponseDto({
     deviceId: DEVICE_ID,
     userId: USER_ID,
     activo: true,
@@ -36,7 +36,7 @@ describe('DispositivosController', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
-  };
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -70,10 +70,9 @@ describe('DispositivosController', () => {
           version: 1,
         },
       };
-      const user: UserPayload = {
-        sub: USER_ID,
-        email: 'test@test.com',
-        rol: Rol.ADMINISTRADOR,
+      const user: AuthenticatedUser = {
+        id: USER_ID,
+        correoElectronico: 'test@test.com',
       };
       dispositivosService.create.mockResolvedValue(dispositivoMock);
 
@@ -95,11 +94,15 @@ describe('DispositivosController', () => {
           total: 1,
         },
       };
-      dispositivosService.findAllForPagination.mockResolvedValue(paginatedResult);
+      dispositivosService.findAllForPagination.mockResolvedValue(
+        paginatedResult,
+      );
 
       const result = await controller.findAllForPagination(dto);
 
-      expect(dispositivosService.findAllForPagination).toHaveBeenCalledWith(dto);
+      expect(dispositivosService.findAllForPagination).toHaveBeenCalledWith(
+        dto,
+      );
       expect(result).toEqual(paginatedResult);
     });
   });
@@ -113,20 +116,31 @@ describe('DispositivosController', () => {
       expect(dispositivosService.findById).toHaveBeenCalledWith(DEVICE_ID);
       expect(result).toEqual(dispositivoMock);
     });
+
+    it('debe retornar null si el dispositivo no existe', async () => {
+      dispositivosService.findById.mockResolvedValue(null);
+
+      const result = await controller.findById(DEVICE_ID);
+
+      expect(dispositivosService.findById).toHaveBeenCalledWith(DEVICE_ID);
+      expect(result).toBeNull();
+    });
   });
 
   describe('update', () => {
     it('debe actualizar un dispositivo', async () => {
-      const user: UserPayload = {
-        sub: USER_ID,
-        email: 'test@test.com',
-        rol: Rol.ADMINISTRADOR,
+      const user: AuthenticatedUser = {
+        id: USER_ID,
+        correoElectronico: 'test@test.com',
       };
       dispositivosService.update.mockResolvedValue();
 
       const result = await controller.update(DEVICE_ID, user);
 
-      expect(dispositivosService.update).toHaveBeenCalledWith(DEVICE_ID, USER_ID);
+      expect(dispositivosService.update).toHaveBeenCalledWith(
+        DEVICE_ID,
+        USER_ID,
+      );
       expect(result).toBeUndefined();
     });
   });
@@ -137,7 +151,9 @@ describe('DispositivosController', () => {
 
       const result = await controller.updateLastSync(DEVICE_ID);
 
-      expect(dispositivosService.updateLastSync).toHaveBeenCalledWith(DEVICE_ID);
+      expect(dispositivosService.updateLastSync).toHaveBeenCalledWith(
+        DEVICE_ID,
+      );
       expect(result).toBeUndefined();
     });
   });
@@ -159,7 +175,10 @@ describe('DispositivosController', () => {
     it('debe aceptar un UUID válido', async () => {
       const validUuid = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
 
-      const result = await pipe.transform(validUuid, { type: 'param', metatype: String });
+      const result = await pipe.transform(validUuid, {
+        type: 'param',
+        metatype: String,
+      });
 
       expect(result).toBe(validUuid);
     });
@@ -167,17 +186,17 @@ describe('DispositivosController', () => {
     it('debe lanzar BadRequestException para un ID inválido', async () => {
       const invalidId = 'disp-001';
 
-      await expect(pipe.transform(invalidId, { type: 'param', metatype: String })).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(invalidId, { type: 'param', metatype: String }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('debe lanzar BadRequestException para un UUID con formato incorrecto', async () => {
       const malformedUuid = 'not-a-uuid';
 
-      await expect(pipe.transform(malformedUuid, { type: 'param', metatype: String })).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(malformedUuid, { type: 'param', metatype: String }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });
