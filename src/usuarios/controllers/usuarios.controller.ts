@@ -10,7 +10,7 @@ import { UseAuth } from 'src/common/decorators/use-auth.decorator';
 import { Rol } from 'src/common/types/user-role.enum';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { AuthenticatedUser } from 'src/common/interfaces/authenticated-user.interface';
-import { ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
@@ -25,6 +25,10 @@ export class UsuariosController {
   @Post()
   @ApiCreatedResponse({
     description: 'El registro se ha creado correctamente, y se devuelve el objeto del cliente creado.',
+      type: UsuarioResponseDto,
+  })
+  @ApiBadRequestResponse({
+  description: 'Solicitud inválida. Los datos enviados no cumplen con las validaciones requeridas.',
   })
   @ApiForbiddenResponse({ description: 'Prohibido, no tiene permisos para realizar esta acción.' })
   async create(@Body() dto: CreateUsuarioDto): Promise<UsuarioResponseDto> {
@@ -34,6 +38,10 @@ export class UsuariosController {
   @Get('correo/:correoElectronico')
   @ApiOkResponse({
     description: 'Usuario encontrado correctamente mediante su correo electrónico.',
+      type: UsuarioResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Solicitud inválida. El correo electrónico enviado no tiene formato válido.',
   })
   async findByCorreoElectronico(@Param('correoElectronico') correoElectronico: string): Promise<UsuarioResponseDto | null> {
     return this.usuariosService.findByCorreoElectronico(correoElectronico);
@@ -42,6 +50,7 @@ export class UsuariosController {
   @Get()
   @ApiOkResponse({
     description: 'Lista paginada de usuarios obtenida correctamente.',
+      type: UsuarioResponseDto,
   })
   async findAllPaginated(@Query() dto: PaginatedQueryDto): Promise<PaginatedResultDto<UsuarioResponseDto>> {
     return this.usuariosService.findAllPaginated(dto);
@@ -50,6 +59,10 @@ export class UsuariosController {
   @Get(':id')
   @ApiOkResponse({
     description: 'Usuario encontrado correctamente.',
+      type: UsuarioResponseDto,
+  })
+  @ApiBadRequestResponse({
+  description: 'Solicitud inválida. El identificador enviado no tiene formato UUID válido.',
   })
   async findById(@Param('id', ParseUUIDPipe) id: string): Promise<UsuarioResponseDto | null> {
     return this.usuariosService.findById(id);

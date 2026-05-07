@@ -9,7 +9,7 @@ import { ClienteResponseDto } from '../dtos/responses/cliente-response.dto';
 import { ClientesService } from '../services/clientes.service';
 import { UseAuth } from 'src/common/decorators/use-auth.decorator';
 import { Rol } from 'src/common/types/user-role.enum';
-import { ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @ApiUnauthorizedResponse({
@@ -23,9 +23,15 @@ export class ClientesController {
 
   @Post()
   @ApiCreatedResponse({
-    description: 'El registro se ha creado correctamente, y se devuelve el objeto del cliente creado.',
+  description: 'Cliente creado correctamente. Devuelve la información del cliente registrado.',
+  type: ClienteResponseDto,
   })
-  @ApiForbiddenResponse({ description: 'Prohibido, no tiene permisos para realizar esta acción.' })
+  @ApiBadRequestResponse({
+  description: 'Solicitud inválida. Los datos enviados no cumplen con las validaciones requeridas.',
+  })
+  @ApiForbiddenResponse({
+  description: 'Prohibido. No tiene permisos para realizar esta acción.',
+  })
   async create(@Body() dto: CreateClienteDto): Promise<ClienteResponseDto> {
     return this.clientesService.create(dto);
   }
@@ -33,6 +39,7 @@ export class ClientesController {
   @Get('numero-documento/:numeroDocumento')
   @ApiOkResponse({
     description: 'Cliente encontrado correctamente.',
+      type: ClienteResponseDto,
   })
   @ApiForbiddenResponse({ description: 'Prohibido, no tiene permisos para realizar esta acción.' })
   async findByNumeroDocumento(@Param('numeroDocumento') numeroDocumento: string): Promise<ClienteResponseDto | null> {
@@ -42,6 +49,7 @@ export class ClientesController {
   @Get('sync')
   @ApiOkResponse({
   description: 'Lista de clientes obtenida correctamente para sincronización.',
+    type: ClienteResponseDto,
   }) 
   async findAllForSync(@Query() dto: SyncQueryDto): Promise<ClienteResponseDto[]> {
     return this.clientesService.findAllForSync(dto);
@@ -50,6 +58,7 @@ export class ClientesController {
   @Get()
   @ApiOkResponse({
   description: 'Lista paginada de clientes obtenida correctamente.',
+    type: ClienteResponseDto,
   })
   async findAllPaginated(@Query() dto: PaginatedQueryDto): Promise<PaginatedResultDto<ClienteResponseDto>> {
     return this.clientesService.findAllPaginated(dto);
@@ -58,6 +67,7 @@ export class ClientesController {
   @Get(':id')
   @ApiOkResponse({
   description: 'Cliente encontrado correctamente.',
+    type: ClienteResponseDto,
   })
   @ApiForbiddenResponse({ description: 'Prohibido, no tiene permisos para realizar esta acción.' })
   async findById(@Param('id', ParseUUIDPipe) id: string): Promise<ClienteResponseDto | null> {

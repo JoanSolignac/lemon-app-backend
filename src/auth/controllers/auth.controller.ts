@@ -22,6 +22,7 @@ export class AuthController {
   @HttpCode(200)
   @ApiOkResponse({
     description: 'Inicio de sesión realizado correctamente. Devuelve el token de acceso del usuario autenticado.',
+    type: AccessTokenDto,
   })
   @ApiBadRequestResponse({
     description: 'Solicitud inválida. El correo electrónico o la contraseña no cumplen con el formato requerido.',
@@ -39,6 +40,7 @@ export class AuthController {
   @HttpCode(200)
   @ApiOkResponse({
     description: 'Token renovado correctamente. Devuelve un nuevo token de acceso.',
+    type: AccessTokenDto,
   })
   @ApiBadRequestResponse({
     description: 'Solicitud inválida. El token enviado no cumple con el formato requerido.',

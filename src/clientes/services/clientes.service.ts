@@ -93,7 +93,7 @@ export class ClientesService {
   }
 
   private toResponse(cliente: Cliente): ClienteResponseDto {
-    return {
+    return Object.assign(new ClienteResponseDto(), {
       id: cliente.id,
       razonSocial: cliente.razonSocial,
       tipoDocumento: cliente.tipoDocumento,
@@ -107,6 +107,6 @@ export class ClientesService {
       createdAt: cliente.createdAt,
       updatedAt: cliente.updatedAt,
       deletedAt: cliente.deletedAt,
-    };
+    });
   }
 }

@@ -88,15 +88,15 @@ export class UsuariosService {
   }
 
   private toResponse(usuario: Usuario): UsuarioResponseDto {
-    return {
-      id: usuario.id,
-      rol: usuario.rol,
-      nombre: usuario.nombre,
-      correoElectronico: usuario.correoElectronico,
-      activo: usuario.activo,
-      createdAt: usuario.createdAt,
-      updatedAt: usuario.updatedAt,
-      deletedAt: usuario.deletedAt,
-    };
+  return Object.assign(new UsuarioResponseDto(), {
+    id: usuario.id,
+    rol: usuario.rol,
+    nombre: usuario.nombre,
+    correoElectronico: usuario.correoElectronico,
+    activo: usuario.activo,
+    createdAt: usuario.createdAt,
+    updatedAt: usuario.updatedAt,
+    deletedAt: usuario.deletedAt,
+    });
   }
 }
