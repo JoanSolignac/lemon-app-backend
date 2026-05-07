@@ -1,22 +1,24 @@
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { ClienteUpdateParams } from '../types/cliente-update-params.type';
-import { Cliente } from '../types/cliente.type'
+import { Cliente } from '../types/cliente.type';
 import { SoftDeleteParams } from '../types/soft-delete-params.type';
 import { SyncQueryParams } from '../../common/types/sync-query-params.type';
 import { CreateCliente } from '../types/create-cliente.type';
 
 export interface IClientesRepository {
-  create(data: CreateCliente): Promise<Cliente>
+  create(data: CreateCliente): Promise<Cliente>;
 
-  findById(id: string): Promise<Cliente | null>
+  findById(id: string): Promise<Cliente | null>;
 
-  findByNumeroDocumento(numeroDocumento: string): Promise<Cliente | null>
+  findByNumeroDocumento(numeroDocumento: string): Promise<Cliente | null>;
 
-  findAllForSync(params: SyncQueryParams): Promise<Cliente[]>
+  findAllForSync(params: SyncQueryParams): Promise<Cliente[]>;
 
-  findAllForPagination(params: PaginatedParams): Promise<{ data: Cliente[]; total: number }>
+  findAllForPagination(
+    params: PaginatedParams,
+  ): Promise<{ data: Cliente[]; total: number }>;
 
-  update(params: ClienteUpdateParams): Promise<void>
+  update(params: ClienteUpdateParams): Promise<void>;
 
-  softDelete(params: SoftDeleteParams): Promise<void>
+  softDelete(params: SoftDeleteParams): Promise<void>;
 }

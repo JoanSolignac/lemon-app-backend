@@ -82,7 +82,9 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('debe retornar access y refresh token cuando las credenciales son válidas', async () => {
-      usuariosService.findForAuthByCorreoElectronico.mockResolvedValue(authUserMock);
+      usuariosService.findForAuthByCorreoElectronico.mockResolvedValue(
+        authUserMock,
+      );
       hashService.compare.mockResolvedValue(true);
       jwtService.signAsync
         .mockResolvedValueOnce('signed-access-token')
@@ -90,8 +92,13 @@ describe('AuthService', () => {
 
       const result = await authService.login(loginDto);
 
-      expect(usuariosService.findForAuthByCorreoElectronico).toHaveBeenCalledWith(loginDto.correoElectronico);
-      expect(hashService.compare).toHaveBeenCalledWith(loginDto.contrasena, authUserMock.contrasena);
+      expect(
+        usuariosService.findForAuthByCorreoElectronico,
+      ).toHaveBeenCalledWith(loginDto.correoElectronico);
+      expect(hashService.compare).toHaveBeenCalledWith(
+        loginDto.contrasena,
+        authUserMock.contrasena,
+      );
       expect(jwtService.signAsync).toHaveBeenCalledWith({
         sub: authUserMock.id,
         email: authUserMock.correoElectronico,
@@ -117,7 +124,9 @@ describe('AuthService', () => {
     it('debe rechazar cuando el usuario no existe', async () => {
       usuariosService.findForAuthByCorreoElectronico.mockResolvedValue(null);
 
-      await expect(authService.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(authService.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(hashService.compare).not.toHaveBeenCalled();
       expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
@@ -128,16 +137,22 @@ describe('AuthService', () => {
         activo: false,
       });
 
-      await expect(authService.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(authService.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(hashService.compare).not.toHaveBeenCalled();
       expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 
     it('debe rechazar cuando la contraseña es inválida', async () => {
-      usuariosService.findForAuthByCorreoElectronico.mockResolvedValue(authUserMock);
+      usuariosService.findForAuthByCorreoElectronico.mockResolvedValue(
+        authUserMock,
+      );
       hashService.compare.mockResolvedValue(false);
 
-      await expect(authService.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(authService.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
       expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
   });
@@ -161,4 +176,3 @@ describe('AuthService', () => {
     });
   });
 });
-

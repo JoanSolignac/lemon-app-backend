@@ -1,11 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
-import { config } from 'process';
 import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionFilter } from './common/filters/exception/all-exception.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,9 +17,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
-        enableImplicitConversion: true
-      }
-    })
+        enableImplicitConversion: true,
+      },
+    }),
   );
 
   const swaggerConfig = new DocumentBuilder()
@@ -31,21 +28,20 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-    
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
   SwaggerModule.setup('api/v1/docs', app, document);
 
   app.enableCors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:4200',
-  ],
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://localhost:4200',
+    ],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   });
 
   const port = process.env.PORT ?? 3000;
@@ -54,7 +50,5 @@ async function bootstrap() {
 
   console.log(`Servidor levantado en http://localhost:${port}`);
   console.log(`Swagger disponible en http://localhost:${port}/api/v1/docs`);
-
-
 }
-bootstrap();
+void bootstrap();

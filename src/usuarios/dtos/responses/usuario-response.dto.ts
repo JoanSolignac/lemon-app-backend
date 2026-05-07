@@ -1,72 +1,59 @@
-import { Rol } from 'src/common/types/user-role.enum';
-import { ApiProperty } from '@nestjs/swagger';  
+import { ApiProperty } from '@nestjs/swagger';
 
-/*export type UsuarioResponseDto = {
-  id: string;
-  rol: Rol;
-  nombre: string;
-  correoElectronico: string;
-  activo: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-};*/
+import { Rol } from 'src/common/types/user-role.enum';
 
 export class UsuarioResponseDto {
   @ApiProperty({
     example: '8f3f4b2e-6d5c-4e2c-9a8b-123456789abc',
-    description: 'Identificador único del cliente.',
+    description: 'Identificador único del usuario.',
   })
-  id!: string;
-  
+  public readonly id: string;
+
   @ApiProperty({
     enum: Rol,
     example: Rol.ADMINISTRADOR,
     description: 'Rol asignado al usuario dentro del sistema.',
   })
-  rol!: Rol;
+  public readonly rol: Rol;
 
   @ApiProperty({
-    example: 'Lemon SAC',
-    description: 'Razón social del cliente.',
+    example: 'JUAN PEREZ',
+    description: 'Nombre completo del usuario.',
   })
-  razonSocial!: string;
+  public readonly nombre: string;
 
   @ApiProperty({
-    example: 'RUC',
-    description: 'Tipo de documento del cliente.',
+    example: 'admin@lemon.pe',
+    description: 'Correo electrónico del usuario.',
   })
-  tipoDocumento!: string;
+  public readonly correoElectronico: string;
 
   @ApiProperty({
-    example: '20123456789',
-    description: 'Número de documento del cliente.',
+    example: true,
+    description: 'Indica si el usuario se encuentra activo.',
   })
-  numeroDocumento!: string;
+  public readonly activo: boolean;
 
   @ApiProperty({
-    example: 'MAYORISTA',
-    description: 'Tipo de cliente.',
+    example: '2026-05-07T12:00:00.000Z',
+    description: 'Fecha y hora de creación del registro.',
   })
-  tipoCliente!: string;
+  public readonly createdAt: Date;
 
   @ApiProperty({
-    example: '987654321',
-    description: 'Número telefónico del cliente.',
+    example: '2026-05-07T15:30:00.000Z',
+    description: 'Fecha y hora de la última actualización.',
   })
-  numeroTelefono!: string;
+  public readonly updatedAt: Date;
 
   @ApiProperty({
-    example: 'contacto@lemon.com',
-    description: 'Correo electrónico del cliente.',
+    example: null,
+    nullable: true,
+    description: 'Fecha de eliminación lógica del usuario.',
   })
-  correoElectronico!: string;
+  public readonly deletedAt: Date | null;
 
-  @ApiProperty({
-    example: 'Iquitos, Perú',
-    description: 'Dirección del cliente.',
-  })
-  direccion!: string;
+  constructor(data: Partial<UsuarioResponseDto>) {
+    Object.assign(this, data);
+  }
 }
-
-

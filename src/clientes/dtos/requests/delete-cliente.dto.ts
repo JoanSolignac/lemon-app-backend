@@ -1,6 +1,6 @@
-import { IsInt } from "class-validator";
+import { IsInt } from 'class-validator';
 
 export class DeleteClienteDto {
-    @IsInt()
-    declare readonly version: number;
+  @IsInt()
+  declare readonly version: number;
 }

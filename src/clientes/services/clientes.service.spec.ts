@@ -8,7 +8,7 @@ import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
 import { UpdateClienteDto } from '../dtos/requests/update-cliente.dto';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
 import { IClientesRepository } from '../repositories/clientes.repository';
-import { TipoDocumento, TipoCliente } from '../types/cliente.type';
+import { Cliente, TipoDocumento, TipoCliente } from '../types/cliente.type';
 import { ClientesService } from './clientes.service';
 
 describe('ClientesService', () => {
@@ -39,7 +39,7 @@ describe('ClientesService', () => {
     direccion: 'IQUITOS',
   };
 
-  const clienteMock = {
+  const clienteMock: Cliente = {
     ...createDto,
     correoElectronico: 'contacto@lemon.com',
     activo: true,
@@ -90,7 +90,9 @@ describe('ClientesService', () => {
     it('debe propagar conflicto por claves unicas al crear un cliente', async () => {
       const error = new ConflictException('Número de documento ya registrado');
       clienteRepository.create.mockRejectedValue(error);
-      await expect(clienteService.create(createDto)).rejects.toThrow(ConflictException);
+      await expect(clienteService.create(createDto)).rejects.toThrow(
+        ConflictException,
+      );
       expect(clienteRepository.create).toHaveBeenCalledTimes(1);
     });
   });
@@ -121,9 +123,12 @@ describe('ClientesService', () => {
     it('debe retornar un cliente por numero de documento', async () => {
       clienteRepository.findByNumeroDocumento.mockResolvedValue(clienteMock);
 
-      const result = await clienteService.findByNumeroDocumento(NUMERO_DOCUMENTO);
+      const result =
+        await clienteService.findByNumeroDocumento(NUMERO_DOCUMENTO);
 
-      expect(clienteRepository.findByNumeroDocumento).toHaveBeenCalledWith(NUMERO_DOCUMENTO);
+      expect(clienteRepository.findByNumeroDocumento).toHaveBeenCalledWith(
+        NUMERO_DOCUMENTO,
+      );
       expect(clienteRepository.findByNumeroDocumento).toHaveBeenCalledTimes(1);
       expect(result).toEqual(clienteMock);
     });
@@ -131,9 +136,12 @@ describe('ClientesService', () => {
     it('debe retornar null si no existe cliente con el numero de documento', async () => {
       clienteRepository.findByNumeroDocumento.mockResolvedValue(null);
 
-      const result = await clienteService.findByNumeroDocumento(NUMERO_DOCUMENTO);
+      const result =
+        await clienteService.findByNumeroDocumento(NUMERO_DOCUMENTO);
 
-      expect(clienteRepository.findByNumeroDocumento).toHaveBeenCalledWith(NUMERO_DOCUMENTO);
+      expect(clienteRepository.findByNumeroDocumento).toHaveBeenCalledWith(
+        NUMERO_DOCUMENTO,
+      );
       expect(clienteRepository.findByNumeroDocumento).toHaveBeenCalledTimes(1);
       expect(result).toBeNull();
     });
@@ -154,9 +162,15 @@ describe('ClientesService', () => {
   describe('findAllPaginated', () => {
     it('debe retornar clientes paginados', async () => {
       const dto: PaginatedQueryDto = { page: 2, limit: 10 };
-      clienteRepository.findAllForPagination.mockResolvedValue({ data: [clienteMock], total: 25 });
+      clienteRepository.findAllForPagination.mockResolvedValue({
+        data: [clienteMock],
+        total: 25,
+      });
       const result = await clienteService.findAllPaginated(dto);
-      expect(clienteRepository.findAllForPagination).toHaveBeenCalledWith({ skip: 10, take: 10 });
+      expect(clienteRepository.findAllForPagination).toHaveBeenCalledWith({
+        skip: 10,
+        take: 10,
+      });
       expect(clienteRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         data: [clienteMock],
@@ -170,9 +184,15 @@ describe('ClientesService', () => {
 
     it('debe normalizar parámetros de paginación', async () => {
       const dto: PaginatedQueryDto = { page: 0, limit: 500 };
-      clienteRepository.findAllForPagination.mockResolvedValue({ data: [], total: 0 });
+      clienteRepository.findAllForPagination.mockResolvedValue({
+        data: [],
+        total: 0,
+      });
       const result = await clienteService.findAllPaginated(dto);
-      expect(clienteRepository.findAllForPagination).toHaveBeenCalledWith({ skip: 0, take: 100 });
+      expect(clienteRepository.findAllForPagination).toHaveBeenCalledWith({
+        skip: 0,
+        take: 100,
+      });
       expect(clienteRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         data: [],
@@ -207,7 +227,9 @@ describe('ClientesService', () => {
     it('debe propagar conflicto por claves unicas al actualizar un cliente', async () => {
       const error = new ConflictException('Número de documento ya registrado');
       clienteRepository.update.mockRejectedValue(error);
-      await expect(clienteService.update(ID_CLIENTE, updateDto)).rejects.toThrow(ConflictException);
+      await expect(
+        clienteService.update(ID_CLIENTE, updateDto),
+      ).rejects.toThrow(ConflictException);
       expect(clienteRepository.update).toHaveBeenCalledTimes(1);
     });
   });
@@ -229,7 +251,9 @@ describe('ClientesService', () => {
     it('debe propagar error al eliminar un cliente', async () => {
       const error = new Error('Error al eliminar cliente');
       clienteRepository.softDelete.mockRejectedValue(error);
-      await expect(clienteService.delete(ID_CLIENTE, deleteDto)).rejects.toThrow('Error al eliminar cliente');
+      await expect(
+        clienteService.delete(ID_CLIENTE, deleteDto),
+      ).rejects.toThrow('Error al eliminar cliente');
       expect(clienteRepository.softDelete).toHaveBeenCalledTimes(1);
     });
   });

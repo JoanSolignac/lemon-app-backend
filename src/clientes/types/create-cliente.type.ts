@@ -1,4 +1,4 @@
-import { TipoDocumento, TipoCliente } from "./cliente.type";
+import { TipoDocumento, TipoCliente } from './cliente.type';
 
 export type CreateCliente = {
   id: string;
@@ -9,4 +9,4 @@ export type CreateCliente = {
   numeroTelefono: string;
   correoElectronico: string | null;
   direccion: string;
-}
+};

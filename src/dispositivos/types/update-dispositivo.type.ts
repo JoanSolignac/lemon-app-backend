@@ -1,4 +1,4 @@
 export type UpdateDispositivo = {
-    userId?: string,
-    lastSyncAt?: Date,
-}
+  userId?: string;
+  lastSyncAt?: Date;
+};

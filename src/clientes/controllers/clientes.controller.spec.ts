@@ -6,6 +6,7 @@ import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
 import { CreateClienteDto } from '../dtos/requests/create-cliente.dto';
 import { DeleteClienteDto } from '../dtos/requests/delete-cliente.dto';
 import { UpdateClienteDto } from '../dtos/requests/update-cliente.dto';
+import { ClienteResponseDto } from '../dtos/responses/cliente-response.dto';
 import { ClientesService } from '../services/clientes.service';
 import { TipoDocumento, TipoCliente } from '../types/cliente.type';
 import { ClientesController } from './clientes.controller';
@@ -25,7 +26,7 @@ describe('ClientesController', () => {
 
   const ID_CLIENTE = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
 
-  const clienteMock = {
+  const clienteMock = new ClienteResponseDto({
     id: ID_CLIENTE,
     razonSocial: 'LEMON SAC',
     tipoDocumento: TipoDocumento.RUC,
@@ -39,7 +40,7 @@ describe('ClientesController', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
-  };
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -101,7 +102,9 @@ describe('ClientesController', () => {
 
       const result = await controller.findByNumeroDocumento('20123456781');
 
-      expect(clientesService.findByNumeroDocumento).toHaveBeenCalledWith('20123456781');
+      expect(clientesService.findByNumeroDocumento).toHaveBeenCalledWith(
+        '20123456781',
+      );
       expect(result).toEqual(clienteMock);
     });
   });
@@ -173,7 +176,10 @@ describe('ClientesController', () => {
     it('debe aceptar un UUID válido', async () => {
       const validUuid = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
 
-      const result = await pipe.transform(validUuid, { type: 'param', metatype: String });
+      const result = await pipe.transform(validUuid, {
+        type: 'param',
+        metatype: String,
+      });
 
       expect(result).toBe(validUuid);
     });
@@ -181,17 +187,17 @@ describe('ClientesController', () => {
     it('debe lanzar BadRequestException para un ID inválido', async () => {
       const invalidId = 'cli-001';
 
-      await expect(pipe.transform(invalidId, { type: 'param', metatype: String })).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(invalidId, { type: 'param', metatype: String }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('debe lanzar BadRequestException para un UUID con formato incorrecto', async () => {
       const malformedUuid = 'not-a-uuid';
 
-      await expect(pipe.transform(malformedUuid, { type: 'param', metatype: String })).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        pipe.transform(malformedUuid, { type: 'param', metatype: String }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

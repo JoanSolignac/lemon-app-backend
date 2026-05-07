@@ -1,73 +1,89 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
+import { DeviceMetadata, Dispositivo } from '../../types/dispositivo.type';
 
-/*export type DeviceMetadataDto = {
-  name: string;
-  platform: string;
-  version: number;
-};*/
-
-
-/*export type DispositivoDto = {
-  deviceId: string;
-  userId: string;
-  activo: boolean;
-  lastSyncAt: Date | null;
-  metadata: DeviceMetadataDto | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-};*/
-
-export class DeviceMetadataDto {
+export class DeviceMetadataResponseDto {
   @ApiProperty({
-    example: 'Celular de Mariano Lovera',
-    description: 'Nombre del dispositivo.',
+    example: 'Samsung S24 Fe',
+    description: 'Nombre o modelo del dispositivo.',
   })
-  name!: string;
+  public readonly name: string;
 
   @ApiProperty({
-    example: 'Android',
+    example: 'IOS',
     description: 'Plataforma o sistema operativo del dispositivo.',
   })
-  platform!: string;
+  public readonly platform: string;
 
   @ApiProperty({
     example: 1,
-    description: 'Versión del dispositivo o de la aplicación instalada.',
+    description: 'Versión de la aplicación instalada en el dispositivo.',
   })
-  version!: number;
+  public readonly version: number;
+
+  constructor(data: DeviceMetadata) {
+    Object.assign(this, data);
+  }
 }
 
-
-export class DispositivoDto {
+export class DispositivoResponseDto {
   @ApiProperty({
     example: '8f3f4b2e-6d5c-4e2c-9a8b-123456789abc',
     description: 'Identificador único del dispositivo.',
   })
-  id!: string;
-
-  @ApiProperty({
-    example: 'Dispositivo principal',
-    description: 'Nombre asignado al dispositivo.',
-  })
-  nombre!: string;
+  public readonly deviceId: string;
 
   @ApiProperty({
     example: 'a1b2c3d4-5678-90ab-cdef-123456789abc',
-    description: 'Identificador del usuario propietario del dispositivo.',
+    description: 'Identificador del usuario propietario.',
   })
-  usuarioId!: string;
-
-  @ApiPropertyOptional({
-    example: '2026-05-05T20:30:00.000Z',
-    description: 'Fecha de la última sincronización del dispositivo.',
-  })
-  ultimaSincronizacion?: Date;
+  public readonly userId: string;
 
   @ApiProperty({
-    example: '2026-05-05T20:00:00.000Z',
-    description: 'Fecha de creación del dispositivo.',
+    example: true,
+    description: 'Indica si el dispositivo se encuentra activo.',
   })
-  creadoEn!: Date;
+  public readonly activo: boolean;
+
+  @ApiProperty({
+    example: '2026-05-07T15:30:00.000Z',
+    nullable: true,
+    description: 'Fecha y hora de la última sincronización exitosa.',
+  })
+  public readonly lastSyncAt: Date | null;
+
+  @ApiProperty({
+    type: DeviceMetadataResponseDto,
+    nullable: true,
+    description: 'Metadatos técnicos del dispositivo.',
+  })
+  public readonly metadata: DeviceMetadataResponseDto | null;
+
+  @ApiProperty({
+    example: '2026-05-01T10:00:00.000Z',
+    description: 'Fecha y hora de creación del registro.',
+  })
+  public readonly createdAt: Date;
+
+  @ApiProperty({
+    example: '2026-05-07T15:30:00.000Z',
+    description: 'Fecha y hora de la última actualización.',
+  })
+  public readonly updatedAt: Date;
+
+  @ApiProperty({
+    example: null,
+    nullable: true,
+    description: 'Fecha de eliminación lógica del dispositivo.',
+  })
+  public readonly deletedAt: Date | null;
+
+  constructor(data: Dispositivo) {
+    Object.assign(this, {
+      ...data,
+      metadata: data.metadata
+        ? new DeviceMetadataResponseDto(data.metadata)
+        : null,
+    });
+  }
 }

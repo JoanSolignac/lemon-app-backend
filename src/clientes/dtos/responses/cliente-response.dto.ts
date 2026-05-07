@@ -1,69 +1,91 @@
-import { TipoDocumento, TipoCliente } from '../../types/cliente.type';
 import { ApiProperty } from '@nestjs/swagger';
 
-/*export type ClienteResponseDto = {
-  id: string;
-  razonSocial: string;
-  tipoDocumento: TipoDocumento;
-  numeroDocumento: string;
-  tipoCliente: TipoCliente;
-  numeroTelefono: string;
-  correoElectronico: string | null;
-  direccion: string;
-  activo: boolean;
-  version: number;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
-};*/
+import { TipoCliente, TipoDocumento } from '../../types/cliente.type';
 
 export class ClienteResponseDto {
-  
   @ApiProperty({
     example: '8f3f4b2e-6d5c-4e2c-9a8b-123456789abc',
     description: 'Identificador único del cliente.',
   })
-  id!: string;
+  public readonly id: string;
 
   @ApiProperty({
     example: 'Pacific Market SAC',
-    description: 'Razón social del cliente.',
+    description: 'Razón social o nombre comercial del cliente.',
   })
-  razonSocial!: string;
+  public readonly razonSocial: string;
 
   @ApiProperty({
-    example: 'RUC',
-    description: 'Tipo de documento del cliente.',
+    enum: TipoDocumento,
+    example: TipoDocumento.RUC,
+    description: 'Tipo de documento de identificación del cliente.',
   })
-  tipoDocumento!: string;
+  public readonly tipoDocumento: TipoDocumento;
 
   @ApiProperty({
     example: '20123456789',
-    description: 'Número de documento del cliente.',
+    description: 'Número del documento de identificación.',
   })
-  numeroDocumento!: string;
+  public readonly numeroDocumento: string;
 
   @ApiProperty({
-    example: 'MAYORISTA',
-    description: 'Tipo de cliente.',
+    enum: TipoCliente,
+    example: TipoCliente.MAYORISTA,
+    description: 'Clasificación comercial del cliente.',
   })
-  tipoCliente!: string;
+  public readonly tipoCliente: TipoCliente;
 
   @ApiProperty({
     example: '987654321',
-    description: 'Número telefónico del cliente.',
+    description: 'Número telefónico principal del cliente.',
   })
-  numeroTelefono!: string;
+  public readonly numeroTelefono: string;
 
   @ApiProperty({
-    example: 'contacto@lemon.com',
+    example: 'contacto@pacific.pe',
+    nullable: true,
     description: 'Correo electrónico del cliente.',
   })
-  correoElectronico!: string;
+  public readonly correoElectronico: string | null;
 
   @ApiProperty({
     example: 'Iquitos, Perú',
-    description: 'Dirección del cliente.',
+    description: 'Dirección o referencia de ubicación del cliente.',
   })
-  direccion!: string;
+  public readonly direccion: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'Indica si el cliente se encuentra activo.',
+  })
+  public readonly activo: boolean;
+
+  @ApiProperty({
+    example: 1,
+    description: 'Versión actual del registro para control optimista.',
+  })
+  public readonly version: number;
+
+  @ApiProperty({
+    example: '2026-05-07T12:00:00.000Z',
+    description: 'Fecha y hora de creación del registro.',
+  })
+  public readonly createdAt: Date;
+
+  @ApiProperty({
+    example: '2026-05-07T14:30:00.000Z',
+    description: 'Fecha y hora de la última actualización.',
+  })
+  public readonly updatedAt: Date;
+
+  @ApiProperty({
+    example: null,
+    nullable: true,
+    description: 'Fecha de eliminación lógica del registro.',
+  })
+  public readonly deletedAt: Date | null;
+
+  constructor(data: Partial<ClienteResponseDto>) {
+    Object.assign(this, data);
+  }
 }

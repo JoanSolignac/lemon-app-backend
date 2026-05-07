@@ -4,6 +4,7 @@ import { LoginDto } from '../dtos/requests/login.dto';
 import { AuthService } from '../services/auth.service';
 import { AuthController } from './auth.controller';
 import { Rol } from 'src/common/types/user-role.enum';
+import { AuthenticatedUser } from '../../common/interfaces/authenticated-user.interface';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -49,16 +50,16 @@ describe('AuthController', () => {
 
       const result = await controller.login(dto);
 
-      expect(authService.login).toHaveBeenCalledWith(dto);
+      expect(jest.mocked(authService.login)).toHaveBeenCalledWith(dto);
       expect(result).toEqual(tokens);
     });
   });
 
   describe('refresh', () => {
     it('debe delegar el refresh al servicio de auth', async () => {
-      const userPayload: Parameters<AuthController['refresh']>[0] = {
-        sub: 'usr-001',
-        email: 'admin@lemon.pe',
+      const authenticatedUser: AuthenticatedUser = {
+        id: 'usr-001',
+        correoElectronico: 'admin@lemon.pe',
         rol: Rol.ADMINISTRADOR,
       };
       const tokens = {
@@ -67,9 +68,11 @@ describe('AuthController', () => {
       };
       authService.refresh.mockResolvedValue(tokens);
 
-      const result = await controller.refresh(userPayload);
+      const result = await controller.refresh(authenticatedUser);
 
-      expect(authService.refresh).toHaveBeenCalledWith(userPayload);
+      expect(jest.mocked(authService.refresh)).toHaveBeenCalledWith(
+        authenticatedUser,
+      );
       expect(result).toEqual(tokens);
     });
   });

@@ -1,5 +1,8 @@
 import { describe, expect, it } from '@jest/globals';
-import { calculateSkipTakeForPagination, normalizePaginationDto } from './pagination.util';
+import {
+  calculateSkipTakeForPagination,
+  normalizePaginationDto,
+} from './pagination.util';
 
 describe('normalizePaginationDto', () => {
   it('deberia devolver valores validos sin cambiarlos', () => {
@@ -24,7 +27,10 @@ describe('normalizePaginationDto', () => {
   });
 
   it('deberia usar valores por defecto cuando recibe NaN', () => {
-    const result = normalizePaginationDto({ page: Number.NaN, limit: Number.NaN });
+    const result = normalizePaginationDto({
+      page: Number.NaN,
+      limit: Number.NaN,
+    });
 
     expect(result.page).toBe(1);
     expect(result.limit).toBe(1);

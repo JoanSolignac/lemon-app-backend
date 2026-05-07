@@ -8,7 +8,9 @@ export class CreateClienteDto {
 
   @IsString()
   @Length(3, 150)
-  @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
+  @Transform(({ value }): string =>
+    typeof value === 'string' ? value.toUpperCase() : value,
+  )
   declare readonly razonSocial: string;
 
   @IsEnum(TipoDocumento)
@@ -28,10 +30,14 @@ export class CreateClienteDto {
   @IsOptional()
   @IsString()
   @IsEmail()
-  @Transform(({ value }) => typeof value === 'string' ? value.toLowerCase() : value)
+  @Transform(({ value }): string =>
+    typeof value === 'string' ? value.toLowerCase() : value,
+  )
   declare readonly correoElectronico?: string;
 
   @IsString()
-  @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
+  @Transform(({ value }): string =>
+    typeof value === 'string' ? value.toUpperCase() : value,
+  )
   declare readonly direccion: string;
 }

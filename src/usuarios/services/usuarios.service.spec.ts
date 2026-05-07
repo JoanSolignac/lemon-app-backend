@@ -2,12 +2,13 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaginatedQueryDto } from 'src/common/dtos/requests/paginated-query.dto';
-import { SyncQueryDto } from 'src/common/dtos/requests/sync-query.dto';
+import { Rol } from 'src/common/types/user-role.enum';
+import { HashService } from 'src/hash/services/hash.service';
 import { IUSUARIO_REPOSITORY } from '../constants/usuarios.constant';
 import { CreateUsuarioDto } from '../dtos/requests/create-usuario.dto';
 import { UpdateUsuarioDto } from '../dtos/requests/update-usuario';
 import { IUsuariosRepository } from '../repositories/usuarios.repository';
-import { HashService } from 'src/hash/services/hash.service';
+import { Usuario } from '../types/usuario.type';
 import { UsuariosService } from './usuarios.service';
 
 describe('UsuariosService', () => {
@@ -27,11 +28,6 @@ describe('UsuariosService', () => {
     softDelete: jest.fn(),
   };
 
-  enum Rol {
-    ADMINISTRADOR = 'ADMINISTRADOR',
-    SUPERVISOR = 'SUPERVISOR',
-  }
-
   const ID_USUARIO = '2f5c7d3f-0a0b-4b9d-8e2a-7d7c9d7d4a11';
   const CORREO_ELECTRONICO = 'admin@lemon.pe';
   const NOMBRE = 'JUAN PEREZ';
@@ -48,12 +44,11 @@ describe('UsuariosService', () => {
     rol: Rol.ADMINISTRADOR,
     nombre: NOMBRE,
     correoElectronico: CORREO_ELECTRONICO,
-    contrasena: 'hashed-123456',
     activo: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
-  };
+  } as Usuario;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -109,7 +104,9 @@ describe('UsuariosService', () => {
       const error = new ConflictException('Correo electronico ya registrado');
       usuarioRepository.create.mockRejectedValue(error);
 
-      await expect(usuariosService.create(createDto)).rejects.toThrow(ConflictException);
+      await expect(usuariosService.create(createDto)).rejects.toThrow(
+        ConflictException,
+      );
       expect(usuarioRepository.create).toHaveBeenCalledTimes(1);
     });
   });
@@ -149,10 +146,15 @@ describe('UsuariosService', () => {
     it('debe retornar un usuario por correo electronico', async () => {
       usuarioRepository.findByCorreoElectronico.mockResolvedValue(usuarioMock);
 
-      const result = await usuariosService.findByCorreoElectronico(CORREO_ELECTRONICO);
+      const result =
+        await usuariosService.findByCorreoElectronico(CORREO_ELECTRONICO);
 
-      expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledWith(CORREO_ELECTRONICO);
-      expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledTimes(1);
+      expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledWith(
+        CORREO_ELECTRONICO,
+      );
+      expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledTimes(
+        1,
+      );
       expect(result).toEqual({
         id: usuarioMock.id,
         rol: usuarioMock.rol,
@@ -168,10 +170,15 @@ describe('UsuariosService', () => {
     it('debe retornar null si no existe usuario con el correo electronico', async () => {
       usuarioRepository.findByCorreoElectronico.mockResolvedValue(null);
 
-      const result = await usuariosService.findByCorreoElectronico(CORREO_ELECTRONICO);
+      const result =
+        await usuariosService.findByCorreoElectronico(CORREO_ELECTRONICO);
 
-      expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledWith(CORREO_ELECTRONICO);
-      expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledTimes(1);
+      expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledWith(
+        CORREO_ELECTRONICO,
+      );
+      expect(usuarioRepository.findByCorreoElectronico).toHaveBeenCalledTimes(
+        1,
+      );
       expect(result).toBeNull();
     });
   });
@@ -179,11 +186,17 @@ describe('UsuariosService', () => {
   describe('findAllPaginated', () => {
     it('debe retornar usuarios paginados', async () => {
       const dto: PaginatedQueryDto = { page: 2, limit: 10 };
-      usuarioRepository.findAllForPagination.mockResolvedValue({ data: [usuarioMock], total: 25 });
+      usuarioRepository.findAllForPagination.mockResolvedValue({
+        data: [usuarioMock],
+        total: 25,
+      });
 
       const result = await usuariosService.findAllPaginated(dto);
 
-      expect(usuarioRepository.findAllForPagination).toHaveBeenCalledWith({ skip: 10, take: 10 });
+      expect(usuarioRepository.findAllForPagination).toHaveBeenCalledWith({
+        skip: 10,
+        take: 10,
+      });
       expect(usuarioRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         data: [
@@ -208,11 +221,17 @@ describe('UsuariosService', () => {
 
     it('debe normalizar parámetros de paginación', async () => {
       const dto: PaginatedQueryDto = { page: 0, limit: 500 };
-      usuarioRepository.findAllForPagination.mockResolvedValue({ data: [], total: 0 });
+      usuarioRepository.findAllForPagination.mockResolvedValue({
+        data: [],
+        total: 0,
+      });
 
       const result = await usuariosService.findAllPaginated(dto);
 
-      expect(usuarioRepository.findAllForPagination).toHaveBeenCalledWith({ skip: 0, take: 100 });
+      expect(usuarioRepository.findAllForPagination).toHaveBeenCalledWith({
+        skip: 0,
+        take: 100,
+      });
       expect(usuarioRepository.findAllForPagination).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
         data: [],
@@ -272,7 +291,9 @@ describe('UsuariosService', () => {
       const error = new ConflictException('Correo electronico ya registrado');
       usuarioRepository.update.mockRejectedValue(error);
 
-      await expect(usuariosService.update(ID_USUARIO, updateDto)).rejects.toThrow(ConflictException);
+      await expect(
+        usuariosService.update(ID_USUARIO, updateDto),
+      ).rejects.toThrow(ConflictException);
       expect(usuarioRepository.update).toHaveBeenCalledTimes(1);
     });
   });
@@ -296,7 +317,9 @@ describe('UsuariosService', () => {
       const error = new Error('Usuario no encontrado');
       usuarioRepository.updateRol.mockRejectedValue(error);
 
-      await expect(usuariosService.updateRol(ID_USUARIO, dto)).rejects.toThrow('Usuario no encontrado');
+      await expect(usuariosService.updateRol(ID_USUARIO, dto)).rejects.toThrow(
+        'Usuario no encontrado',
+      );
       expect(usuarioRepository.updateRol).toHaveBeenCalledTimes(1);
     });
   });
@@ -315,7 +338,9 @@ describe('UsuariosService', () => {
       const error = new Error('Error al eliminar usuario');
       usuarioRepository.softDelete.mockRejectedValue(error);
 
-      await expect(usuariosService.delete(ID_USUARIO)).rejects.toThrow('Error al eliminar usuario');
+      await expect(usuariosService.delete(ID_USUARIO)).rejects.toThrow(
+        'Error al eliminar usuario',
+      );
       expect(usuarioRepository.softDelete).toHaveBeenCalledTimes(1);
     });
   });

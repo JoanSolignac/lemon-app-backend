@@ -1,8 +1,16 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PaginatedParams } from 'src/common/types/paginated-params.type';
 import { PrismaService } from '../../database/prisma/prisma.service';
-import { USUARIO_CORREO_ELECTRONICO_CONFLICT, USUARIO_ID_CONFLICT } from '../errors/usuarios.errors';
+import {
+  USUARIO_CORREO_ELECTRONICO_CONFLICT,
+  USUARIO_ID_CONFLICT,
+} from '../errors/usuarios.errors';
 import { IUsuariosRepository } from '../repositories/usuarios.repository';
 import { UsuarioForAuth } from '../types/usuario-for-auth.type';
 import { SELECT_USUARIO_FOR_AUTH } from '../types/usuario-for-auth-select.type';
@@ -11,8 +19,12 @@ import { CreateUsuario } from '../types/create-usuario.type';
 import { Usuario } from '../types/usuario.type';
 import { UsuarioUpdateParams } from '../types/usuario-update-params.type';
 import { UsuarioUpdateRolParams } from '../types/usuario-update-rol-params.type';
-import { toDomain, toDomainForAuth, toDomainList, toPrismaUsuarioRol } from './usuario-prisma-mapper';
-import { SyncQueryParams } from '../types/sync-query-params.type';
+import {
+  toDomain,
+  toDomainForAuth,
+  toDomainList,
+  toPrismaUsuarioRol,
+} from './usuario-prisma-mapper';
 
 @Injectable()
 export class UsuariosPrismaRepository implements IUsuariosRepository {
@@ -53,7 +65,9 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     return prismaUsuario ? toDomain(prismaUsuario) : null;
   }
 
-  async findByCorreoElectronico(correoElectronico: string): Promise<Usuario | null> {
+  async findByCorreoElectronico(
+    correoElectronico: string,
+  ): Promise<Usuario | null> {
     this.logger.debug('find usuario by correo electronico');
 
     const prismaUsuario = await this.prisma.usuario.findFirst({
@@ -63,7 +77,9 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     return prismaUsuario ? toDomain(prismaUsuario) : null;
   }
 
-  async findForAuthByCorreoElectronico(correoElectronico: string): Promise<UsuarioForAuth | null> {
+  async findForAuthByCorreoElectronico(
+    correoElectronico: string,
+  ): Promise<UsuarioForAuth | null> {
     this.logger.debug('find usuario for auth by correo electronico');
 
     const prismaUsuarioForAuth = await this.prisma.usuario.findFirst({
@@ -73,7 +89,9 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
     return prismaUsuarioForAuth ? toDomainForAuth(prismaUsuarioForAuth) : null;
   }
 
-  async findAllForPagination(params: PaginatedParams): Promise<{ data: Usuario[]; total: number }> {
+  async findAllForPagination(
+    params: PaginatedParams,
+  ): Promise<{ data: Usuario[]; total: number }> {
     this.logger.debug('find all usuarios');
 
     const { skip, take } = params;
@@ -84,10 +102,7 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
         where,
         skip,
         take,
-        orderBy: [
-          { nombre: 'desc' },
-          { id: 'desc' },
-        ],
+        orderBy: [{ nombre: 'desc' }, { id: 'desc' }],
         select: SELECT_USUARIOS,
       }),
       this.prisma.usuario.count({
@@ -176,52 +191,57 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
   }
 
   private handlePrismaError(error: unknown): never {
-    if (error instanceof ConflictException || error instanceof NotFoundException) {
+    if (
+      error instanceof ConflictException ||
+      error instanceof NotFoundException
+    ) {
       throw error;
     }
 
     /**
      * @description Maneja errores de Prisma relacionados con violaciones de restricciones UNIQUE (P2002).
      */
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
       let target = this.getUniqueConstraintTarget(error);
 
-      this.logger.debug(
-        `Unique constraint target: ${JSON.stringify(target)}`
-      );
+      this.logger.debug(`Unique constraint target: ${JSON.stringify(target)}`);
 
-      target = target.map(field =>
-        field.toLowerCase().replace(/_/g, '')
-      );
+      target = target.map((field) => field.toLowerCase().replace(/_/g, ''));
 
-      if (target.some(field => field.includes('id'))){
+      if (target.some((field) => field.includes('id'))) {
         throw new ConflictException({
           code: USUARIO_ID_CONFLICT,
           message: 'El usuario ya existe.',
-        })
+        });
       }
 
-      if (target.some(field => field.includes('correoelectronico'))){
+      if (target.some((field) => field.includes('correoelectronico'))) {
         throw new ConflictException({
           code: USUARIO_CORREO_ELECTRONICO_CONFLICT,
           message: 'El correo electronico ya existe.',
-        })
+        });
       }
     }
 
     /**
      * @description Maneja errores de Prisma cuando un registro requerido no existe (P2025).
      */
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2025'
+    ) {
       throw new NotFoundException('Usuario no encontrado.');
     }
 
     throw error;
   }
 
-  private getUniqueConstraintTarget(error: Prisma.PrismaClientKnownRequestError): string[] {
-
+  private getUniqueConstraintTarget(
+    error: Prisma.PrismaClientKnownRequestError,
+  ): string[] {
     /**
      * @description Extrae los campos afectados por una restricción UNIQUE (P2002) de Prisma.
      *
@@ -271,6 +291,8 @@ export class UsuariosPrismaRepository implements IUsuariosRepository {
 
     const fields = (constraint as Record<string, unknown>).fields;
 
-    return Array.isArray(fields) ? fields.filter((value): value is string => typeof value === "string") : [];
+    return Array.isArray(fields)
+      ? fields.filter((value): value is string => typeof value === 'string')
+      : [];
   }
 }
